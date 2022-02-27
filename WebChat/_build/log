@@ -1,0 +1,4 @@
+# dune init proj ocaml_webapp --libs core,opium,caqti,caqti-driver-postgresql,caqti-lwt,tyxml,lwt.unix --ppx ppx_rapper
+# OCAMLPARAM: unset
+# Shared cache: disabled
+# Workspace root: /Users/stanleyjiang/cs3110/WebChat
