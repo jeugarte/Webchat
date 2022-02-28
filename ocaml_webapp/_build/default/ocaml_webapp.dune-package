@@ -1,4 +1,0 @@
-(lang dune 3.0)
-(name ocaml_webapp)
-(sections (lib .) (bin ../../bin))
-(files (lib (META dune-package opam)) (bin (ocaml_webapp)))

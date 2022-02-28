@@ -1,3 +1,0 @@
-(library
- (name ocaml_webapp)
- (libraries opium))
