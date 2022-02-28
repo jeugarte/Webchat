@@ -1,9 +1,7 @@
 lib: [
   "_build/install/default/lib/WebChat/META"
   "_build/install/default/lib/WebChat/dune-package"
-]
-bin: [
-  "_build/install/default/bin/WebChat"
+  "_build/install/default/lib/WebChat/opam"
 ]
 doc: [
   "_build/install/default/doc/WebChat/README.md"

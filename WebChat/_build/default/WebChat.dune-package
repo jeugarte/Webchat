@@ -1,4 +1,4 @@
 (lang dune 3.0)
 (name WebChat)
-(sections (lib .) (bin ../../bin) (doc ../../doc/WebChat))
-(files (lib (META dune-package)) (bin (WebChat)) (doc (README.md)))
+(sections (lib .) (doc ../../doc/WebChat))
+(files (lib (META dune-package opam)) (doc (README.md)))
