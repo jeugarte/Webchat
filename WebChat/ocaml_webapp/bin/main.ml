@@ -37,13 +37,16 @@ let streaming_handler req =
 ;;
 
 let print_param_handler req =
-  Printf.sprintf "Hello, %s\n" (Router.param req "username")
+  Printf.sprintf "Hello YOO, %s\n" (Router.param req "username")
   |> Response.of_plain_text
   |> Lwt.return
 ;;
 
+let cors = Middleware.allow_cors ~origins:["http://localhost:8080"] ~credentials:true ()
+
 let _ =
   App.empty
+  |> App.middleware cors
   |> App.post "/hello/stream" streaming_handler
   |> App.get "/hello/:username" print_param_handler
   |> App.get "/user/:username/:password" print_person_handler

@@ -1,31 +1,31 @@
 open Opium
-module Person = struct
+module User = struct
   type t =
-    { name : string
-    ; age : int
+    { username : string
+    ; password : string
     }
 
-  let yojson_of_t t = `Assoc [ "name", `String t.name; "age", `Int t.age ]
+  let yojson_of_t t = `Assoc [ "username", `String t.username; "password", `String t.password ]
 
   let t_of_yojson yojson =
     match yojson with
-    | `Assoc [ ("name", `String name); ("age", `Int age) ] -> { name; age }
-    | _ -> failwith "invalid person json"
+    | `Assoc [ ("username", `String username); ("password", `String password) ] -> { username; password }
+    | _ -> failwith "invalid user json"
   ;;
 end
 
 let print_person_handler req =
-  let name = Router.param req "name" in
-  let age = Router.param req "age" |> int_of_string in
-  let person = { Person.name; age } |> Person.yojson_of_t in
-  Lwt.return (Response.of_json person)
+  let username = Router.param req "username" in
+  let password = Router.param req "password" in
+  let user = { User.username; password } |> User.yojson_of_t in
+  Lwt.return (Response.of_json user)
 ;;
 
 let update_person_handler req =
   let open Lwt.Syntax in
   let+ json = Request.to_json_exn req in
-  let person = Person.t_of_yojson json in
-  Logs.info (fun m -> m "Received person: %s" person.Person.name);
+  let user = User.t_of_yojson json in
+  Logs.info (fun m -> m "Received user: %s" user.User.username);
   Response.of_json (`Assoc [ "message", `String "Person saved" ])
 ;;
 
@@ -37,16 +37,19 @@ let streaming_handler req =
 ;;
 
 let print_param_handler req =
-  Printf.sprintf "Hello, %s\n" (Router.param req "name")
+  Printf.sprintf "Hello YOO, %s\n" (Router.param req "username")
   |> Response.of_plain_text
   |> Lwt.return
 ;;
 
+let cors = Middleware.allow_cors ~origins:["http://localhost:8080"] ~credentials:true ()
+
 let _ =
   App.empty
+  |> App.middleware cors
   |> App.post "/hello/stream" streaming_handler
-  |> App.get "/hello/:name" print_param_handler
-  |> App.get "/person/:name/:age" print_person_handler
-  |> App.patch "/person" update_person_handler
+  |> App.get "/hello/:username" print_param_handler
+  |> App.get "/user/:username/:password" print_person_handler
+  |> App.patch "/user" update_person_handler
   |> App.run_command
 ;;
