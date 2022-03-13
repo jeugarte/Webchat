@@ -1,5 +1,3 @@
-.PHONY: play
-
 build: 
 	dune build
 

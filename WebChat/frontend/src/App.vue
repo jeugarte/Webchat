@@ -1,30 +1,14 @@
 <template>
-  <img alt="Vue logo" src="./assets/logo.png">
-  <HelloWorld v-bind:msg="message"/>
+  <Main />
 </template>
 
 <script>
-import HelloWorld from './components/HelloWorld.vue'
-
-import axios from 'axios'
+import Main from './components/Main.vue'
 
 export default {
   name: 'App',
   components: {
-    HelloWorld
-  },
-  data() {
-    return {
-      message: ""
-    }
-  },
-  mounted() {
-    let self = this;
-    console.log("Mounted");
-    axios.get("http://localhost:3000/hello/stanley").then(function(response) {
-      console.log(response);
-      self.message = response.data;
-    });
+    Main
   }
 }
 </script>
