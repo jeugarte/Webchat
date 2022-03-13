@@ -1,3 +1,9 @@
 (executable
  (name main)
- (libraries WebChat))
+ (libraries tyxml WebChat))
+
+(rule
+ (targets index.html)
+ (deps main.exe)
+ (action
+  (run %{exe:main.exe})))
