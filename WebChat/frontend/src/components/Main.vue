@@ -4,8 +4,8 @@
       <p v-for = "message in pastMessages" v-bind:key = "message.message">{{ message.username }}: {{ message.message }}</p>
     </div>
     <div class = "inputs">
-      <p> Current User: {{ newUser }}
-      <input v-model = "newUser" placeholder = "Username">
+      <p> Current User: {{ currentUser }}
+      <input v-model = "currentUser" placeholder = "Username">
       </p>
       <textarea v-model = "newMessage" placeholder = "New Message"> </textarea>
       <br>
@@ -23,13 +23,13 @@ export default {
   data() {
     return {
       newMessage: "",
-      pastMessages: []
+      pastMessages: [],
+      currentUser: ""
     }
   },
   methods: {
     postMessage: function() {
-      axios.post("http://localhost:3000/messages", {username: this.newUser, message: this.newMessage});
-      this.newUser = ""
+      axios.post("http://localhost:3000/messages", {username: this.currentUser, message: this.newMessage});
       this.newMessage = "";
       this.getMessages();
     },
