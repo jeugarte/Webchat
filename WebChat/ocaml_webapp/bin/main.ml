@@ -1,49 +1,25 @@
 open Opium
 
-module User = struct
-  type user =
-    { email: string
-    ; password : string;
-    username: string
-    }
-
-  
-  let yojson_of_user u = `Assoc [ ("email", `String u.email); 
-  ("password", `String u.password); ("username", `String u.username) ]
-
-
-  let user_of_yojson yojson =
-    match yojson with
-    | `Assoc [ ("email", `String email); ("password", `String password); 
-    ("username", `String username) ] 
-    -> { email; password; username}
-    | _ -> failwith "invalid user json"
-  
-end
-
 let users = ref []
-
-module Message = struct
-  type message = {username : string; msg : string}
-  let yojson_of_message t = `Assoc [ ("username", `String t.username); ("message", 
-  `String t.msg) ]
-  let message_of_yojson yojson =
-    match yojson with
-    | `Assoc [ ("username", `String username); ("message", `String msg) ] 
-    -> { username; msg }
-    | _ -> failwith "invalid message json"
-end
-
 
 let register_user =  
   App.post "/register" (fun request -> 
     Lwt.bind (Request.to_json_exn request) (fun user_json -> let user_info = user_json |> User.user_of_yojson in 
     let matchUser x = 
-      let rec matchUserList = function
+      let rec matchUserList (y : User.user list)= match y with
     | [] -> x := user_info :: !x; Lwt.return (Response.of_plain_text ("Success"))
-    | h :: t -> if h = user_info then (x := !x; Lwt.return (Response.of_plain_text("Failure"))) else matchUserList (t)
+    | {username;email;_} :: t -> if email = user_info.email then (x := !x; Lwt.return (Response.of_plain_text("Email taken"))) else if username = user_info.username then (x := !x; Lwt.return (Response.of_plain_text("Username taken")))else matchUserList (t)
   in matchUserList !x in
        matchUser users))
+
+let login_user = 
+  App.post "/login" (fun request -> 
+    Lwt.bind (Request.to_json_exn request) (fun user_json -> let user_info =
+      user_json |> User.user_of_yojson in 
+      let rec matchUser (x : User.user list) = match x with
+      | [] -> Lwt.return (Response.of_plain_text ("False"))
+      | {username;password;email} :: t -> if username = user_info.username && password = user_info.password then Lwt.return (Response.of_plain_text ("True")) else if email = user_info.email && password = user_info.password then Lwt.return (Response.of_plain_text("True")) else matchUser t
+    in matchUser !users))
 
 let get_users = 
   App.get "/users" (fun _ -> 
@@ -108,6 +84,7 @@ let _ =
   |> App.middleware cors
   |> get_users
   |> register_user
+  |> login_user
   (* |> App.post "/hello/stream" streaming_handler
   |> App.get "/hello/:username" print_param_handler
   |> App.get "/user/:username/:password" print_person_handler

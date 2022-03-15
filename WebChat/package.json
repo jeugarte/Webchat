@@ -4,9 +4,12 @@
     "@babel/preset-env": "^7.16.11",
     "@vue/cli-plugin-babel": "^5.0.1",
     "@vue/cli-plugin-eslint": "^5.0.1",
-    "@vue/cli-service": "^5.0.1",
+    "@vue/cli-service": "^4.5.15",
+    "axios": "^0.26.1",
+    "babel-eslint": "^10.1.0",
     "vue": "^3.2.31",
-    "vue-cli": "^2.9.6",
-    "vue-router": "^4.0.14"
+    "vue-cli": "^2.8.2",
+    "vue-router": "^4.0.14",
+    "vuex": "^4.0.2"
   }
 }

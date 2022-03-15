@@ -3,7 +3,7 @@ import ChainableConfig = require('webpack-chain')
 import webpack = require('webpack')
 import WebpackDevServer = require('webpack-dev-server')
 import express = require('express') // @types/webpack-dev-server depends on @types/express
-import { ProjectOptions, ConfigFunction } from './ProjectOptions'
+import { ProjectOptions } from './ProjectOptions'
 
 type RegisterCommandFn = (args: minimist.ParsedArgs, rawArgv: string[]) => any
 
@@ -134,5 +134,4 @@ type ServicePlugin = (
 ) => any
 
 export { ProjectOptions, ServicePlugin, PluginAPI }
-type UserConfig = ProjectOptions | ConfigFunction
-export function defineConfig(config: UserConfig): UserConfig
+export { ConfigFunction } from './ProjectOptions'

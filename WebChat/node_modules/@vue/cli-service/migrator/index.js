@@ -11,6 +11,4 @@ module.exports = (api) => {
 
     api.exitLog('vue-cli-plugin-vue-next is removed because Vue 3 support has been built into the core plugins.')
   }
-
-  // TODO: lint-staged update
 }

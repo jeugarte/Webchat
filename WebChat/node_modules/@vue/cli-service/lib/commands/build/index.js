@@ -1,8 +1,8 @@
 const defaults = {
   clean: true,
   target: 'app',
-  module: true,
-  formats: 'commonjs,umd,umd-min'
+  formats: 'commonjs,umd,umd-min',
+  'unsafe-inline': true
 }
 
 const buildModes = {
@@ -26,13 +26,14 @@ module.exports = (api, options) => {
     options: {
       '--mode': `specify env mode (default: production)`,
       '--dest': `specify output directory (default: ${options.outputDir})`,
-      '--no-module': `build app without generating <script type="module"> chunks for modern browsers`,
+      '--modern': `build app targeting modern browsers with auto fallback`,
+      '--no-unsafe-inline': `build app without introducing inline scripts`,
       '--target': `app | lib | wc | wc-async (default: ${defaults.target})`,
       '--inline-vue': 'include the Vue module in the final bundle of library or web component target',
       '--formats': `list of output formats for library builds (default: ${defaults.formats})`,
       '--name': `name for lib or web-component mode (default: "name" in package.json or entry filename)`,
       '--filename': `file name for output, only usable for 'lib' target (default: value of --name)`,
-      '--no-clean': `do not remove the dist directory contents before building the project`,
+      '--no-clean': `do not remove the dist directory before building the project`,
       '--report': `generate report.html to help analyze bundle content`,
       '--report-json': 'generate report.json to help analyze bundle content',
       '--skip-plugins': `comma-separated list of plugin names to skip for this run`,
@@ -51,44 +52,43 @@ module.exports = (api, options) => {
     }
 
     process.env.VUE_CLI_BUILD_TARGET = args.target
-
-    const { log, execa } = require('@vue/cli-shared-utils')
-    const { allProjectTargetsSupportModule } = require('../../util/targets')
-
-    let needsDifferentialLoading = args.target === 'app' && args.module
-    if (allProjectTargetsSupportModule) {
-      log(
-        `All browser targets in the browserslist configuration have supported ES module.\n` +
-        `Therefore we don't build two separate bundles for differential loading.\n`
-      )
-      needsDifferentialLoading = false
-    }
-
-    args.needsDifferentialLoading = needsDifferentialLoading
-    if (!needsDifferentialLoading) {
-      await build(args, api, options)
-      return
-    }
-
-    process.env.VUE_CLI_MODERN_MODE = true
-    if (!process.env.VUE_CLI_MODERN_BUILD) {
-      // main-process for legacy build
-      const legacyBuildArgs = { ...args, moduleBuild: false, keepAlive: true }
-      await build(legacyBuildArgs, api, options)
-
-      // spawn sub-process of self for modern build
-      const cliBin = require('path').resolve(__dirname, '../../../bin/vue-cli-service.js')
-      await execa('node', [cliBin, 'build', ...rawArgs], {
-        stdio: 'inherit',
-        env: {
-          VUE_CLI_MODERN_BUILD: true
-        }
-      })
+    if (args.modern && args.target === 'app') {
+      process.env.VUE_CLI_MODERN_MODE = true
+      if (!process.env.VUE_CLI_MODERN_BUILD) {
+        // main-process for legacy build
+        await build(Object.assign({}, args, {
+          modernBuild: false,
+          keepAlive: true
+        }), api, options)
+        // spawn sub-process of self for modern build
+        const { execa } = require('@vue/cli-shared-utils')
+        const cliBin = require('path').resolve(__dirname, '../../../bin/vue-cli-service.js')
+        await execa('node', [cliBin, 'build', ...rawArgs], {
+          stdio: 'inherit',
+          env: {
+            VUE_CLI_MODERN_BUILD: true
+          }
+        })
+      } else {
+        // sub-process for modern build
+        await build(Object.assign({}, args, {
+          modernBuild: true,
+          clean: false
+        }), api, options)
+      }
+      delete process.env.VUE_CLI_MODERN_MODE
     } else {
-      // sub-process for modern build
-      const moduleBuildArgs = { ...args, moduleBuild: true, clean: false }
-      await build(moduleBuildArgs, api, options)
+      if (args.modern) {
+        const { warn } = require('@vue/cli-shared-utils')
+        warn(
+          `Modern mode only works with default target (app). ` +
+          `For libraries or web components, use the browserslist ` +
+          `config to specify target browsers.`
+        )
+      }
+      await build(args, api, options)
     }
+    delete process.env.VUE_CLI_BUILD_TARGET
   })
 }
 
@@ -110,9 +110,9 @@ async function build (args, api, options) {
   log()
   const mode = api.service.mode
   if (args.target === 'app') {
-    const bundleTag = args.needsDifferentialLoading
-      ? args.moduleBuild
-        ? `module bundle `
+    const bundleTag = args.modern
+      ? args.modernBuild
+        ? `modern bundle `
         : `legacy bundle `
       : ``
     logWithSpinner(`Building ${bundleTag}for ${mode}...`)
@@ -132,7 +132,7 @@ async function build (args, api, options) {
   }
 
   const targetDir = api.resolve(options.outputDir)
-  const isLegacyBuild = args.needsDifferentialLoading && !args.moduleBuild
+  const isLegacyBuild = args.target === 'app' && args.modern && !args.modernBuild
 
   // resolve raw webpack config
   let webpackConfig
@@ -169,7 +169,7 @@ async function build (args, api, options) {
     modifyConfig(webpackConfig, config => {
       config.plugins.push(new DashboardPlugin({
         type: 'build',
-        moduleBuild: args.moduleBuild,
+        modernBuild: args.modernBuild,
         keepAlive: args.keepAlive
       }))
     })
@@ -193,7 +193,7 @@ async function build (args, api, options) {
   }
 
   if (args.clean) {
-    await fs.emptyDir(targetDir)
+    await fs.remove(targetDir)
   }
 
   return new Promise((resolve, reject) => {
@@ -204,7 +204,7 @@ async function build (args, api, options) {
       }
 
       if (stats.hasErrors()) {
-        return reject(new Error('Build failed with errors.'))
+        return reject(`Build failed with errors.`)
       }
 
       if (!args.silent) {
