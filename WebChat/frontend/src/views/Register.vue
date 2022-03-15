@@ -19,7 +19,7 @@
           <label for = "pass-confirm">Confirm Password:</label>
           <input type = "password" name = "pass-confirm" id = "pass-confirm" v-model="passConfirm">
         </div>
-        <button type = "submit"> Submit</button>
+        <button type = "submit" v-on:click = "postRegister"> Submit</button>
       </div>
     </div>
     <div class = "login">
@@ -29,6 +29,7 @@
 </template>
 
 <script>
+import axios from 'axios';
 export default {
   name: "Register",
   data () {
@@ -40,6 +41,15 @@ export default {
       },
       passConfirm: ""
     }
+  },
+  methods: {
+    postRegister: function() {
+      axios.post("http://localhost:3000/register", 
+      {email: this.form.email, password: this.form.password, username: this.form.username}).
+      then(function(response) {
+        window.alert(response.data);
+      });
+    },
   }
 }
 </script>

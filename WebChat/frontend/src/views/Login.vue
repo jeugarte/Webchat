@@ -11,7 +11,7 @@
           <label for = "password">Password:</label>
           <input type = "password" name = "password" id = "password" v-model="form.password">
         </div>
-        <button type = "submit"> Submit</button>
+        <button type = "submit" v-on:click = "postLogin"> Submit</button>
       </div>
     </div>
     <div class = "register">
@@ -21,6 +21,7 @@
 </template>
 
 <script>
+import axios from 'axios';
 export default {
   name: "Register",
   data () {
@@ -30,6 +31,15 @@ export default {
         password: ""
       }
     }
+  },
+  methods: {
+    postLogin: function() {
+      axios.post("http://localhost:3000/login", 
+      {email: this.form.user, password: this.form.password, username: this.form.user}).
+      then(function(response) {
+        window.alert(response.data);
+      });
+    },
   }
 }
 </script>
