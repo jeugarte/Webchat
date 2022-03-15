@@ -3,6 +3,7 @@ open Opium
 (* users list to store users locally *)
 let users = ref []
 
+(* register_user creates a post request that takes in a json containing the email, password, username of a new user and outputs "Email taken" if users contains the email already, "Username taken" if users contains the username already, and "Success" if the information can be used to create a user that is added to users *)
 let register_user =  
   App.post "/register" (fun request -> 
     Lwt.bind (Request.to_json_exn request) (fun user_json -> let user_info = user_json |> User.user_of_yojson in 
