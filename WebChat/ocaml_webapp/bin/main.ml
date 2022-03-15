@@ -77,7 +77,7 @@ let print_param_handler req =
   |> Lwt.return
 *)
 
-let cors = Middleware.allow_cors ~origins:["http://localhost:8080"] ~credentials:true ()
+let cors = Middleware.allow_cors ~origins:["*"] ~credentials:false ()
 
 let _ =
   App.empty

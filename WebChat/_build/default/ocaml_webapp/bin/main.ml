@@ -17,8 +17,8 @@ let login_user =
     Lwt.bind (Request.to_json_exn request) (fun user_json -> let user_info =
       user_json |> User.user_of_yojson in 
       let rec matchUser (x : User.user list) = match x with
-      | [] -> Lwt.return (Response.of_plain_text ("False"))
-      | {username;password;email} :: t -> if username = user_info.username && password = user_info.password then Lwt.return (Response.of_plain_text ("True")) else if email = user_info.email && password = user_info.password then Lwt.return (Response.of_plain_text("True")) else matchUser t
+      | [] -> Lwt.return (Response.of_plain_text ("No User"))
+      | {username;password;email} :: t -> if username = user_info.username && password = user_info.password then Lwt.return (Response.of_plain_text (email)) else if email = user_info.email && password = user_info.password then Lwt.return (Response.of_plain_text(email)) else matchUser t
     in matchUser !users))
 
 let get_users = 
@@ -77,7 +77,7 @@ let print_param_handler req =
   |> Lwt.return
 *)
 
-let cors = Middleware.allow_cors ~origins:["http://localhost:8080"] ~credentials:true ()
+let cors = Middleware.allow_cors ~origins:["*"] ~credentials:false ()
 
 let _ =
   App.empty

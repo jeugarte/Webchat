@@ -1,12 +1,10 @@
 <template>
-  <div>
+  <div class = "container">
     <div class = "past-messages">
       <p v-for = "message in pastMessages" v-bind:key = "message.message">{{ message.username }}: {{ message.message }}</p>
     </div>
     <div class = "inputs">
-      <p> Current User: {{ currentUser }}
-      <input v-model = "currentUser" placeholder = "Username">
-      </p>
+      <p> Current User: {{ user.username }}</p>
       <textarea v-model = "newMessage" placeholder = "New Message"> </textarea>
       <br>
       <button v-on:click = "postMessage">ENTER</button>
@@ -17,31 +15,38 @@
 <script>
 
 import axios from 'axios';
+import { mapGetters } from "vuex";
+
 
 export default {
   name: "Main",
   data() {
     return {
       newMessage: "",
-      pastMessages: [],
-      currentUser: ""
+      pastMessages: []
     }
+  },
+  computed: {
+    ...mapGetters({
+      user: 'User'
+    })
   },
   methods: {
     postMessage: function() {
-      axios.post("http://localhost:3000/messages", {username: this.currentUser, message: this.newMessage});
+      axios.post("postMessage", {username: this.user.username, message: this.newMessage});
       this.newMessage = "";
       this.getMessages();
     },
     getMessages: function() {
       let self = this;
-      axios.get("http://localhost:3000/messages").then(function(response) {
+      axios.get("getMessages").then(function(response) {
         self.pastMessages = response.data.data;
       });
     }
   },
   mounted() {
     this.getMessages();
+    console.log(this.user);
     window.setInterval(this.getMessages, 100);
   }
 }
@@ -49,8 +54,12 @@ export default {
 
 <style scoped>
 
-.past-messages {
+.container {
+  text-align: center;
+}
 
+.container * {
+  text-align: center;
 }
 
 </style>

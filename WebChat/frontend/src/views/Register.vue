@@ -44,10 +44,17 @@ export default {
   },
   methods: {
     postRegister: function() {
-      axios.post("http://localhost:3000/register", 
+      let self = this;
+      axios.post("register",
       {email: this.form.email, password: this.form.password, username: this.form.username}).
       then(function(response) {
-        window.alert(response.data);
+        console.log(response.data);
+        if (response.data === "Success") {
+          self.$store.commit('setUser', {username: self.form.username, email: self.form.email});
+          self.$router.push("/");
+        } else {
+          window.alert(response.data);
+        }
       });
     },
   }

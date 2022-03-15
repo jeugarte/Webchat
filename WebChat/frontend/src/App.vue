@@ -12,8 +12,12 @@ export default {
     }
   },
   mounted() {
+    console.log(location.host);
     window.addEventListener("resize", this.onResize);
     this.onResize();
+  },
+  created() {
+    this.$store.commit("clearState");
   }
 }
 

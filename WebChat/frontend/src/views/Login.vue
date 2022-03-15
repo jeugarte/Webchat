@@ -34,10 +34,17 @@ export default {
   },
   methods: {
     postLogin: function() {
-      axios.post("http://localhost:3000/login", 
+      let self = this;
+      axios.post("login",
       {email: this.form.user, password: this.form.password, username: this.form.user}).
       then(function(response) {
-        window.alert(response.data);
+        console.log(response.data);
+        if (response.data === "No User") {
+          window.alert("No User");
+        } else {
+          self.$store.commit('setUser', {username: response.data.username, email: response.data.email});
+          self.$router.push("/");
+        }
       });
     },
   }
