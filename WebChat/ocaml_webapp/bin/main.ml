@@ -18,7 +18,7 @@ let login_user =
       user_json |> User.user_of_yojson in 
       let rec matchUser (x : User.user list) = match x with
       | [] -> Lwt.return (Response.of_plain_text ("No User"))
-      | {username;password;email} :: t -> if username = user_info.username && password = user_info.password then Lwt.return (Response.of_plain_text (email)) else if email = user_info.email && password = user_info.password then Lwt.return (Response.of_plain_text(email)) else matchUser t
+      | {username;password;email} :: t -> if username = user_info.username && password = user_info.password then Lwt.return (Response.of_plain_text (email)) else if email = user_info.email && password = user_info.password then Lwt.return (Response.of_json(`Assoc[("email", `String email);("username", `String username)])) else matchUser t
     in matchUser !users))
 
 let get_users = 
@@ -33,20 +33,34 @@ let get_users =
 let messages = ref []
 
 let read_messages = 
-  App.get "/messages" (fun _ -> 
+  App.get "/getMessages" (fun _ -> 
     let messages = !messages in
-    let rec json x = match x with
+    let rec json (x : Message.message list) = match x with
     | [] -> []
-    | h :: t -> Message.yojson_of_message (h) :: json t
+    | h1 :: t1 -> `Assoc [("username", `String (let rec find_user (y : User.user list) = match y with
+    | [] -> failwith "no users"
+    | h2 :: t2 -> if h2.email = h1.userid then h2.username else find_user t2 
+  in find_user !users)); 
+    ("message", `String h1.msg)] :: json t1
   in
     Lwt.return (Response.of_json (`Assoc [ ("data", `List (json messages))])))
 
 let post_messages = 
-  App.post "/messages" (fun request -> 
+  App.post "/postMessage" (fun request -> 
     Lwt.bind (Request.to_json_exn request) (fun input_json ->
-    let input_message = input_json |> Message.message_of_yojson in
-    messages := input_message :: !messages; Lwt.return 
-    (Response.make ~status: `OK ())))
+    (let rec input_message (x : User.user list) : Message.message = match x with 
+    | [] -> failwith "no users"
+    | h :: t -> if h.username = (let match_user y = match y with
+      | `Assoc [ ("username", `String username); _ ] 
+        -> username
+      | _ -> failwith "invalid message json" in match_user input_json) then 
+        {userid = h.email; msg = (let match_message z = match z with
+      | `Assoc [ _ ; ("message", `String message)] 
+        -> message
+      | _ -> failwith "invalid message json" in match_message input_json)} 
+    else 
+        input_message t in messages := input_message !users :: !messages); 
+        Lwt.return (Response.make ~status: `OK ())))
     
 (*
 let print_person_handler req =
