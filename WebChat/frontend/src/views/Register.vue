@@ -1,26 +1,28 @@
 <template>
-  <div class = "container" v-bind:style = "{height: $store.getters.WindowHeight + 'px'}">
+  <div class = "container" v-on:keyup.enter = "postRegister"  v-bind:style = "{height: $store.getters.WindowHeight + 'px'}">
     <div class = "content">
       <h2>Register</h2>
-      <div class = "form">
-        <div>
-          <label for = "email">Email:</label>
-          <input type = "text" name = "email" id = "email" v-model="form.email">
+        <div class = "form">
+          <form>
+            <div>
+              <label for = "email">Email:</label>
+              <input type = "text" name = "email" id = "email" v-model="form.email">
+            </div>
+            <div>
+              <label for = "username">Username:</label>
+              <input type = "text" name = "username" id = "username" v-model="form.username">
+            </div>
+            <div>
+              <label for = "password">Password:</label>
+              <input type = "password" name = "password" id = "password" v-model="form.password">
+            </div>
+            <div id = "pass-confirm-div">
+              <label for = "pass-confirm">Confirm Password:</label>
+              <input type = "password" name = "pass-confirm" id = "pass-confirm" v-model="passConfirm">
+            </div>
+          </form>
+          <button type = "submit" v-on:click = "postRegister"> Submit</button>
         </div>
-        <div>
-          <label for = "username">Username:</label>
-          <input type = "text" name = "username" id = "username" v-model="form.username">
-        </div>
-        <div>
-          <label for = "password">Password:</label>
-          <input type = "password" name = "password" id = "password" v-model="form.password">
-        </div>
-        <div id = "pass-confirm-div">
-          <label for = "pass-confirm">Confirm Password:</label>
-          <input type = "password" name = "pass-confirm" id = "pass-confirm" v-model="passConfirm">
-        </div>
-        <button type = "submit" v-on:click = "postRegister"> Submit</button>
-      </div>
     </div>
     <div class = "login">
       <h6>Already have an account? <router-link to = "/login" class = "link">Log in here</router-link>.</h6>
@@ -29,7 +31,6 @@
 </template>
 
 <script>
-import axios from 'axios';
 export default {
   name: "Register",
   data () {
@@ -43,19 +44,21 @@ export default {
     }
   },
   methods: {
-    postRegister: function() {
-      let self = this;
-      axios.post("register",
-      {email: this.form.email, password: this.form.password, username: this.form.username}).
-      then(function(response) {
-        console.log(response.data);
-        if (response.data === "Success") {
-          self.$store.commit('setUser', {username: self.form.username, email: self.form.email});
-          self.$router.push("/");
-        } else {
-          window.alert(response.data);
+    postRegister: async function() {
+      if (this.form.email === "" || !/^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/.test(this.form.email)) {
+        window.alert("Please enter a valid email");
+      } else if (this.form.username === "") {
+        window.alert("Please enter a username");
+      } else if (this.form.password !== this.passConfirm) {
+        window.alert("Please make sure your password matches your confirmation password");
+      } else {
+        try {
+          await this.$store.dispatch("registerUser", this.form);
+          await this.$router.push("/");
+        } catch (error) {
+          window.alert(error);
         }
-      });
+      }
     },
   }
 }

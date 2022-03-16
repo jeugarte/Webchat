@@ -9,6 +9,7 @@ export default {
   methods: {
     onResize: function() {
       this.$store.commit("setWindowHeight");
+      this.$store.commit("setWindowWidth");
     }
   },
   mounted() {
@@ -17,7 +18,7 @@ export default {
     this.onResize();
   },
   created() {
-    this.$store.commit("clearState");
+    this.$store.commit("logOut");
   }
 }
 

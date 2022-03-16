@@ -1,6 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import Home from '../views/Home.vue'
-import store from '../store/store.js';
+import store from '@/store';
 
 
 const routes = [
@@ -39,8 +39,8 @@ const router = createRouter({
 })
 
 router.beforeEach((to, from, next) => {
-  console.log("before each");
-  if (to.meta.requiresAuth && store.state.user.email === null) {
+  const user = store.getters.User;
+  if (to.meta.requiresAuth && user.email === null) {
     next("/login");
   } else {
     next();

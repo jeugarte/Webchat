@@ -18,7 +18,7 @@ let login_user =
       user_json |> User.user_of_yojson in 
       let rec matchUser (x : User.user list) = match x with
       | [] -> Lwt.return (Response.of_plain_text ("No User"))
-      | {username;password;email} :: t -> if username = user_info.username && password = user_info.password then Lwt.return (Response.of_plain_text (email)) else if email = user_info.email && password = user_info.password then Lwt.return (Response.of_json(`Assoc[("email", `String email);("username", `String username)])) else matchUser t
+      | {username;password;email} :: t -> if username = user_info.username && password = user_info.password then Lwt.return (Response.of_json(`Assoc[("email", `String email);("username", `String username)])) else if email = user_info.email && password = user_info.password then Lwt.return (Response.of_json(`Assoc[("email", `String email);("username", `String username)])) else matchUser t
     in matchUser !users))
 
 let get_users = 

@@ -1,5 +1,5 @@
 <template>
-  <div class = "container" v-bind:style = "{height: $store.getters.WindowHeight + 'px'}">
+  <div class = "container" v-on:keyup.enter = "postLogin" v-bind:style = "{height: $store.getters.WindowHeight + 'px'}">
     <div class = "content">
       <h2>Login</h2>
       <div class = "form">
@@ -33,20 +33,14 @@ export default {
     }
   },
   methods: {
-    postLogin: function() {
-      let self = this;
-      axios.post("login",
-      {email: this.form.user, password: this.form.password, username: this.form.user}).
-      then(function(response) {
-        console.log(response.data);
-        if (response.data === "No User") {
-          window.alert("No User");
-        } else {
-          self.$store.commit('setUser', {username: response.data.username, email: response.data.email});
-          self.$router.push("/");
-        }
-      });
-    },
+    postLogin: async function() {
+      try {
+        await this.$store.dispatch("login", this.form);
+        await this.$router.push("/");
+      } catch (error) {
+        window.alert(error);
+      }
+    }
   }
 }
 </script>
