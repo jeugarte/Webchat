@@ -1,0 +1,6 @@
+description = ""
+requires = "opium"
+archive(byte) = "ocaml_webapp.cma"
+archive(native) = "ocaml_webapp.cmxa"
+plugin(byte) = "ocaml_webapp.cma"
+plugin(native) = "ocaml_webapp.cmxs"
