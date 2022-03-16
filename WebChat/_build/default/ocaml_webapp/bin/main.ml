@@ -1,7 +1,9 @@
 open Opium
 
+(* users list to store users locally *)
 let users = ref []
 
+(* register_user creates a post request that takes in a json containing the email, password, username of a new user and outputs "Email taken" if users contains the email already, "Username taken" if users contains the username already, and "Success" if the information can be used to create a user that is added to users *)
 let register_user =  
   App.post "/register" (fun request -> 
     Lwt.bind (Request.to_json_exn request) (fun user_json -> let user_info = user_json |> User.user_of_yojson in 
@@ -12,6 +14,7 @@ let register_user =
   in matchUserList !x in
        matchUser users))
 
+(* login_user creates a post request that takes in the json containing the information for a user x and outputs "No User" if x is not in users and a json containing the email and username of x otherwise *)
 let login_user = 
   App.post "/login" (fun request -> 
     Lwt.bind (Request.to_json_exn request) (fun user_json -> let user_info =
@@ -21,6 +24,7 @@ let login_user =
       | {username;password;email} :: t -> if username = user_info.username && password = user_info.password then Lwt.return (Response.of_json(`Assoc[("email", `String email);("username", `String username)])) else if email = user_info.email && password = user_info.password then Lwt.return (Response.of_json(`Assoc[("email", `String email);("username", `String username)])) else matchUser t
     in matchUser !users))
 
+(* get_users creates a get request that outputs users for testing purposes *)
 let get_users = 
   App.get "/users" (fun _ -> 
     let users = !users in
@@ -30,8 +34,11 @@ let get_users =
   in
     Lwt.return (Response.of_json (`Assoc [ ("users", `List (json users))])))
 
+(* messages list to store messages locally *)
 let messages = ref []
 
+(* read_messages creates a get request that outputs a json containing the list of messages as objects with username and the message
+Raises: "no users" if the userid associated with a message is not an email in users (this should not occur as userid should be immutable after registration) *)
 let read_messages = 
   App.get "/getMessages" (fun _ -> 
     let messages = !messages in
@@ -45,6 +52,9 @@ let read_messages =
   in
     Lwt.return (Response.of_json (`Assoc [ ("data", `List (json messages))])))
 
+(* post_messages creates a post request that takes in a json containing the username and message of a message and adds a message with the userid/email and message as fields to messages 
+Raises: "no users" if the username in the json does not match the current username of any user in users 
+"invalid message json" if the input json does not contain username and message *)
 let post_messages = 
   App.post "/postMessage" (fun request -> 
     Lwt.bind (Request.to_json_exn request) (fun input_json ->
@@ -61,48 +71,18 @@ let post_messages =
     else 
         input_message t in messages := input_message !users :: !messages); 
         Lwt.return (Response.make ~status: `OK ())))
-    
-(*
-let print_person_handler req =
-  let username = Router.param req "username" in
-  let password = Router.param req "password" in
-  let user = { User.username; password } |> User.yojson_of_t in
-  Lwt.return (Response.of_json user)
-
-
-let update_person_handler req =
-  let open Lwt.Syntax in
-  let+ json = Request.to_json_exn req in
-  let user = User.t_of_yojson json in
-  Logs.info (fun m -> m "Received user: %s" user.User.username);
-  Response.of_json (`Assoc [ "message", `String "Person saved" ])
-
-
-let streaming_handler req =
-  let length = Body.length req.Request.body in
-  let content = Body.to_stream req.Request.body in
-  let body = Lwt_stream.map String.uppercase_ascii content in
-  Response.make ~body:(Body.of_stream ?length body) () |> Lwt.return
-
-
-let print_param_handler req =
-  Printf.sprintf "Hello YOO, %s\n" (Router.param req "username")
-  |> Response.of_plain_text
-  |> Lwt.return
-*)
 
 let cors = Middleware.allow_cors ~origins:["*"] ~credentials:false ()
+let static_content = Middleware.static_unix ~local_path:(Unix.realpath "frontend/dist") ()
 
+(* Creates the app with the above functions *)
 let _ =
   App.empty
   |> App.middleware cors
+  |> App.middleware static_content
   |> get_users
   |> register_user
   |> login_user
-  (* |> App.post "/hello/stream" streaming_handler
-  |> App.get "/hello/:username" print_param_handler
-  |> App.get "/user/:username/:password" print_person_handler
-  |> App.patch "/user" update_person_handler *)
   |> read_messages
   |> post_messages
   |> App.run_command
