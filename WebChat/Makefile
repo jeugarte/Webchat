@@ -1,3 +1,5 @@
+.PHONY: test
+
 build: 
 	dune build
 
@@ -8,3 +10,6 @@ run:
 	pkill -f _build/default/ocaml_webapp/bin/main.exe || true
 	OCAMLRUNPARAM=b dune exec ocaml_webapp/bin/main.exe &
 	npm run --prefix frontend serve
+
+test:
+	OCAMLRUNPARAM=b dune exec ocaml_webapp/test/main.exe

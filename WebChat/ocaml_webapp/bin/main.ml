@@ -1,4 +1,5 @@
 open Opium
+open Ocaml_webapp
 
 (* users list to store users locally *)
 let users = ref []

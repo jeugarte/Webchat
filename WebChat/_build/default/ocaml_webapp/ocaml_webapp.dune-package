@@ -1,4 +1,48 @@
 (lang dune 3.0)
 (name ocaml_webapp)
-(sections (lib .) (bin ../../bin))
-(files (lib (META dune-package opam)) (bin (ocaml_webapp)))
+(sections (lib .) (libexec .) (bin ../../bin))
+(files
+ (lib
+  (META
+   User.ml
+   User.mli
+   dune-package
+   ocaml_webapp.a
+   ocaml_webapp.cma
+   ocaml_webapp.cmi
+   ocaml_webapp.cmt
+   ocaml_webapp.cmx
+   ocaml_webapp.cmxa
+   ocaml_webapp.ml
+   ocaml_webapp__User.cmi
+   ocaml_webapp__User.cmt
+   ocaml_webapp__User.cmti
+   ocaml_webapp__User.cmx
+   opam))
+ (libexec (ocaml_webapp.cmxs))
+ (bin (ocaml_webapp)))
+(library
+ (name ocaml_webapp)
+ (kind normal)
+ (archives (byte ocaml_webapp.cma) (native ocaml_webapp.cmxa))
+ (plugins (byte ocaml_webapp.cma) (native ocaml_webapp.cmxs))
+ (native_archives ocaml_webapp.a)
+ (requires opium)
+ (main_module_name Ocaml_webapp)
+ (modes byte native)
+ (modules
+  (wrapped
+   (main_module_name Ocaml_webapp)
+   (modules
+    ((name User)
+     (obj_name ocaml_webapp__User)
+     (visibility public)
+     (impl)
+     (intf)))
+   (alias_module
+    (name Ocaml_webapp)
+    (obj_name ocaml_webapp)
+    (visibility public)
+    (kind alias)
+    (impl))
+   (wrapped true))))

@@ -1,7 +1,23 @@
 lib: [
   "_build/install/default/lib/ocaml_webapp/META"
+  "_build/install/default/lib/ocaml_webapp/User.ml"
+  "_build/install/default/lib/ocaml_webapp/User.mli"
   "_build/install/default/lib/ocaml_webapp/dune-package"
+  "_build/install/default/lib/ocaml_webapp/ocaml_webapp.a"
+  "_build/install/default/lib/ocaml_webapp/ocaml_webapp.cma"
+  "_build/install/default/lib/ocaml_webapp/ocaml_webapp.cmi"
+  "_build/install/default/lib/ocaml_webapp/ocaml_webapp.cmt"
+  "_build/install/default/lib/ocaml_webapp/ocaml_webapp.cmx"
+  "_build/install/default/lib/ocaml_webapp/ocaml_webapp.cmxa"
+  "_build/install/default/lib/ocaml_webapp/ocaml_webapp.ml"
+  "_build/install/default/lib/ocaml_webapp/ocaml_webapp__User.cmi"
+  "_build/install/default/lib/ocaml_webapp/ocaml_webapp__User.cmt"
+  "_build/install/default/lib/ocaml_webapp/ocaml_webapp__User.cmti"
+  "_build/install/default/lib/ocaml_webapp/ocaml_webapp__User.cmx"
   "_build/install/default/lib/ocaml_webapp/opam"
+]
+libexec: [
+  "_build/install/default/lib/ocaml_webapp/ocaml_webapp.cmxs"
 ]
 bin: [
   "_build/install/default/bin/ocaml_webapp"

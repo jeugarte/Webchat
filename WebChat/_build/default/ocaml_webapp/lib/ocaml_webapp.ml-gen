@@ -1,0 +1,2 @@
+(** @canonical Ocaml_webapp.User *)
+module User = Ocaml_webapp__User
