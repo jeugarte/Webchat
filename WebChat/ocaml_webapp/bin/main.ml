@@ -73,7 +73,11 @@ let post_messages =
         input_message t in messages := input_message !users :: !messages); 
         Lwt.return (Response.make ~status: `OK ())))
 
+
+(* cors creates a middleware that fixes cors policy errors that are encountered when trying to make requests to the server*)
 let cors = Middleware.allow_cors ~origins:["*"] ~credentials:false ()
+
+(* static_content creates a middleware that serves the frontend static files so that the app can be accessed from the browser*)
 let static_content = Middleware.static_unix ~local_path:(Unix.realpath "frontend/dist") ()
 
 (* Creates the app with the above functions *)
