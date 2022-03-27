@@ -8,8 +8,10 @@ play:
 	OCAMLRUNPARAM=b dune exec bin/main.exe
 
 run:
-	pkill -f _build/default/ocaml_webapp/bin/main.exe || true
 	OCAMLRUNPARAM=b dune exec ocaml_webapp/bin/main.exe &
+
+clean:
+	pkill -f _build/default/ocaml_webapp/bin/main.exe || true
 
 serve:
 	pkill -f _build/default/ocaml_webapp/bin/main.exe || true
