@@ -1,4 +1,10 @@
 (executable
  (public_name ocaml_webapp)
  (name main)
- (libraries ounit2 ocaml_webapp opium))
+ (libraries
+  ounit2
+  ocaml_webapp
+  opium
+  caqti
+  caqti-lwt
+  caqti-driver-postgresql))

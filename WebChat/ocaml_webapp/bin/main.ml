@@ -74,13 +74,14 @@ let post_messages =
         Lwt.return (Response.make ~status: `OK ())))
 
 let cors = Middleware.allow_cors ~origins:["*"] ~credentials:false ()
-let static_content = Middleware.static_unix ~local_path:(Unix.realpath "frontend/dist") ()
-
+(*let static_content = Middleware.static_unix ~local_path:(Unix.realpath "frontend/dist") ()
+*)
 (* Creates the app with the above functions *)
 let _ =
   App.empty
   |> App.middleware cors
-  |> App.middleware static_content
+  (*
+  |> App.middleware static_content *)
   |> get_users
   |> register_user
   |> login_user
