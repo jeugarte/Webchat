@@ -1,5 +1,7 @@
 lib: [
   "_build/install/default/lib/ocaml_webapp/META"
+  "_build/install/default/lib/ocaml_webapp/Storage.ml"
+  "_build/install/default/lib/ocaml_webapp/Storage.mli"
   "_build/install/default/lib/ocaml_webapp/User.ml"
   "_build/install/default/lib/ocaml_webapp/User.mli"
   "_build/install/default/lib/ocaml_webapp/dune-package"
@@ -10,6 +12,10 @@ lib: [
   "_build/install/default/lib/ocaml_webapp/ocaml_webapp.cmx"
   "_build/install/default/lib/ocaml_webapp/ocaml_webapp.cmxa"
   "_build/install/default/lib/ocaml_webapp/ocaml_webapp.ml"
+  "_build/install/default/lib/ocaml_webapp/ocaml_webapp__Storage.cmi"
+  "_build/install/default/lib/ocaml_webapp/ocaml_webapp__Storage.cmt"
+  "_build/install/default/lib/ocaml_webapp/ocaml_webapp__Storage.cmti"
+  "_build/install/default/lib/ocaml_webapp/ocaml_webapp__Storage.cmx"
   "_build/install/default/lib/ocaml_webapp/ocaml_webapp__User.cmi"
   "_build/install/default/lib/ocaml_webapp/ocaml_webapp__User.cmt"
   "_build/install/default/lib/ocaml_webapp/ocaml_webapp__User.cmti"

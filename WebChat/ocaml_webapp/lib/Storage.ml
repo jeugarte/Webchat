@@ -3,7 +3,7 @@
 open Lwt.Infix
 
 module Db : Caqti_lwt.CONNECTION = 
-(val Caqti_lwt.connect (Uri.of_string "postgresql://") >>= Caqti_lwt.or_fail |> Lwt_main.run)
+(val Caqti_lwt.connect (Uri.of_string "postgresql://localhost:5432") >>= Caqti_lwt.or_fail |> Lwt_main.run)
 
 open Caqti_request.Infix
 open Caqti_type.Std
@@ -15,9 +15,9 @@ type message = {
 
 let create_msglst = unit ->. unit @@ 
 {eos| 
-  CREATE TEMPORARY TABLE msglst (
-    userid : text NOT NULL,
-    msg : text NOT NULL
+  CREATE TABLE IF NOT EXISTS msglst (
+    userid text NOT NULL,
+    msg text NOT NULL
   )
 |eos}
 
@@ -27,11 +27,11 @@ match result with
 | Ok data -> Lwt.return (Ok data)
 | Error error -> Lwt.fail (failwith (Caqti_error.show error)))
   
-let add_msg = failwith "not implemented"
+(*let add_msg = failwith "not implemented"
   (*tup2 string string ->. unit @@
 "INSERT INTO msglst (userid,msg) VALUES (?, ?)"*)
 
 let read_msgs = failwith "not implemented"
   (*unit ->? unit @@ 
-"SELECT msg FROM msglst WHERE userid = ?"*)
+"SELECT msg FROM msglst WHERE userid = ?"*)*)
 

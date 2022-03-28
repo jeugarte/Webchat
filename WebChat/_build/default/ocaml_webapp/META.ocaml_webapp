@@ -1,5 +1,5 @@
 description = ""
-requires = "opium"
+requires = "caqti caqti-driver-postgresql caqti-lwt opium"
 archive(byte) = "ocaml_webapp.cma"
 archive(native) = "ocaml_webapp.cmxa"
 plugin(byte) = "ocaml_webapp.cma"

@@ -4,6 +4,8 @@
 (files
  (lib
   (META
+   Storage.ml
+   Storage.mli
    User.ml
    User.mli
    dune-package
@@ -14,6 +16,10 @@
    ocaml_webapp.cmx
    ocaml_webapp.cmxa
    ocaml_webapp.ml
+   ocaml_webapp__Storage.cmi
+   ocaml_webapp__Storage.cmt
+   ocaml_webapp__Storage.cmti
+   ocaml_webapp__Storage.cmx
    ocaml_webapp__User.cmi
    ocaml_webapp__User.cmt
    ocaml_webapp__User.cmti
@@ -27,13 +33,18 @@
  (archives (byte ocaml_webapp.cma) (native ocaml_webapp.cmxa))
  (plugins (byte ocaml_webapp.cma) (native ocaml_webapp.cmxs))
  (native_archives ocaml_webapp.a)
- (requires opium)
+ (requires opium caqti caqti-lwt caqti-driver-postgresql)
  (main_module_name Ocaml_webapp)
  (modes byte native)
  (modules
   (wrapped
    (main_module_name Ocaml_webapp)
    (modules
+    ((name Storage)
+     (obj_name ocaml_webapp__Storage)
+     (visibility public)
+     (impl)
+     (intf))
     ((name User)
      (obj_name ocaml_webapp__User)
      (visibility public)

@@ -1,2 +1,6 @@
+(** @canonical Ocaml_webapp.Storage *)
+module Storage = Ocaml_webapp__Storage
+
+
 (** @canonical Ocaml_webapp.User *)
 module User = Ocaml_webapp__User
