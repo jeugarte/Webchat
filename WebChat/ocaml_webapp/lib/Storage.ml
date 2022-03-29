@@ -38,7 +38,7 @@ module Message = struct
   let create_msglst = unit ->. unit @@ 
     {eos| 
       CREATE TABLE IF NOT EXISTS msglst (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        id INTEGER PRIMARY KEY,
         senderid INTEGER NOT NULL,
         recipientid INTEGER NOT NULL,
         sendername TEXT NOT NULL,
@@ -64,11 +64,12 @@ MESSAGES. THATS WHEN WE USE AN ASSOCIATIVE TABLE BUT ILL LOOK INTO THAT*)
     ~decode:(fun (recipientid, msg) -> Ok {recipientid; msg}) Caqti_type.(tup2 int string)) @@ 
     "SELECT * FROM msglst WHERE recipientid = ?"
 
+    (*
   let read_conversation_sql = string ->* (Caqti_type.custom ~encode:(fun ({senderid; recipientid; msg} : message)-> 
     Ok (senderid, recipientid, msg)) 
     ~decode:(fun (senderid, recipientid, msg) -> Ok {senderid; recipientid; msg}) Caqti_type.(tup3 int int string)) @@ 
     "SELECT * FROM msglst WHERE senderid = ? AND recipientid = ?"
-
+    *)
   let read_all_sql = unit ->* (Caqti_type.custom ~encode:(fun ({sendername; recipientname; msg} : sql_sent_message)-> 
     Ok (sendername, recipientname, msg)) 
     ~decode:(fun (sendername, recipientname, msg) -> Ok {sendername; recipientname; msg}) Caqti_type.(tup3 string string string)) @@ 
@@ -95,7 +96,7 @@ let read_sent_msgs senderid () = let open Message in
   | Ok data -> Lwt.return (Ok data)
   | Error error -> failwith (Caqti_error.show error))
 
-let read_received_msgs recipientid () = let open Message in
+let read_recieved_msgs recipientid () = let open Message in
   Lwt.bind (Db.iter_s (read_msg_of_recipient_sql) (fun data -> Lwt_io.print (data.msg^"\n") >>= 
   Lwt.return_ok) recipientid) (fun result ->
   match result with
@@ -127,9 +128,9 @@ let read_all () = let open Message in
 
 
 module User = struct
-  open User
   
-  let create_msglst = unit ->. unit @@ 
+  (*
+  let create_usrlst = unit ->. unit @@ 
     {eos| 
       CREATE TABLE IF NOT EXISTS usrlst (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -140,7 +141,7 @@ module User = struct
         creation date
       )
     |eos}
-
+  
   let add_usr_sql username email password = unit ->. unit @@ 
   "INSERT INTO usrlst (username, email, password) VALUES ('" ^ username ^ "', '" ^ email ^ "', '" ^ password ^ "')"
 
@@ -148,5 +149,5 @@ module User = struct
     Ok (email, password, username)) 
     ~decode:(fun (email, password, username) -> Ok {email; password; username}) Caqti_type.(tup3 string string string)) @@ 
     "SELECT * FROM usrlst WHERE email = ? AND password = ? AND username = ?"
-
+    *)
 end
