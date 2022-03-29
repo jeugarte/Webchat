@@ -21,17 +21,32 @@ let create_msglst = unit ->. unit @@
   )
 |eos}
 
+let add_msg_sql userid msg = unit ->. unit @@ "INSERT INTO msglst (userid, msg) VALUES ('" ^ userid ^ "', '" ^ msg ^ "')"
+
+let read_msg_sql = string ->* (Caqti_type.custom ~encode:(fun {userid; msg} -> Ok (userid, msg)) ~decode:(fun (userid, msg) -> Ok {userid; msg}) Caqti_type.(tup2 string string)) @@ "SELECT * FROM msglst WHERE userid = ?"
+
+let read_all_sql = unit ->* (Caqti_type.custom ~encode:(fun {userid; msg} -> Ok (userid, msg)) ~decode:(fun (userid, msg) -> Ok {userid; msg}) Caqti_type.(tup2 string string)) @@ "SELECT * FROM msglst"
+
+
 let migrate () =
    Lwt.bind (Db.exec create_msglst ()) (fun result ->
 match result with
 | Ok data -> Lwt.return (Ok data)
 | Error error -> Lwt.fail (failwith (Caqti_error.show error)))
-  
-(*let add_msg = failwith "not implemented"
-  (*tup2 string string ->. unit @@
-"INSERT INTO msglst (userid,msg) VALUES (?, ?)"*)
 
-let read_msgs = failwith "not implemented"
-  (*unit ->? unit @@ 
-"SELECT msg FROM msglst WHERE userid = ?"*)*)
+
+let add_msg userid msg () = Lwt.bind (Db.exec (add_msg_sql userid msg) ()) (fun result ->
+  match result with
+  | Ok data -> Lwt.return (Ok data)
+  | Error error -> Lwt.fail (failwith (Caqti_error.show error)))
+
+let read_msgs userid () = Lwt.bind (Db.iter_s (read_msg_sql) (fun data -> Lwt_io.print (data.msg^"\n") >>= Lwt.return_ok) userid) (fun result ->
+  match result with
+  | Ok data -> Lwt.return (Ok data)
+  | Error error -> failwith (Caqti_error.show error))
+
+  let read_all () = Lwt.bind (Db.iter_s (read_all_sql) (fun data -> Lwt_io.print (data.userid^": "^data.msg^"\n") >>= Lwt.return_ok) ()) (fun result ->
+    match result with
+    | Ok data -> Lwt.return (Ok data)
+    | Error error -> failwith (Caqti_error.show error))
 
