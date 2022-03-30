@@ -122,29 +122,3 @@ let read_all () = let open Message in
   match result with
   | Ok data -> Lwt.return (Ok data)
   | Error error -> failwith (Caqti_error.show error))
-
-
-module User = struct
-  
-  (*
-  let create_usrlst = unit ->. unit @@ 
-    {eos| 
-      CREATE TABLE IF NOT EXISTS usrlst (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        username TEXT NOT NULL,
-        email TEXT NOT NULL,
-        password TEXT NOT NULL,
-        contactslist TEXT,
-        creation date
-      )
-    |eos}
-  
-  let add_usr_sql username email password = unit ->. unit @@ 
-  "INSERT INTO usrlst (username, email, password) VALUES ('" ^ username ^ "', '" ^ email ^ "', '" ^ password ^ "')"
-
-  let read_username_and_email_sql = string ->* (Caqti_type.custom ~encode:(fun ({email; password; username} : user) -> 
-    Ok (email, password, username)) 
-    ~decode:(fun (email, password, username) -> Ok {email; password; username}) Caqti_type.(tup3 string string string)) @@ 
-    "SELECT * FROM usrlst WHERE email = ? AND password = ? AND username = ?"
-    *)
-end
