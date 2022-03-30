@@ -5,25 +5,52 @@ open Ocaml_webapp
 let users = ref []
 
 (* register_user creates a post request that takes in a json containing the email, password, username of a new user and outputs "Email taken" if users contains the email already, "Username taken" if users contains the username already, and "Success" if the information can be used to create a user that is added to users *)
-let register_user =  
-  App.post "/register" (fun request -> 
-    Lwt.bind (Request.to_json_exn request) (fun user_json -> let user_info = user_json |> User.user_of_yojson in 
-    let matchUser x = 
+
+    (*let matchUser x = 
       let rec matchUserList (y : User.user list)= match y with
     | [] -> x := user_info :: !x; Lwt.return (Response.of_plain_text ("Success"))
     | {username;email;_} :: t -> if email = user_info.email then (x := !x; Lwt.return (Response.of_plain_text("Email taken"))) else if username = user_info.username then (x := !x; Lwt.return (Response.of_plain_text("Username taken")))else matchUserList (t)
   in matchUserList !x in
-       matchUser users))
+       matchUser users*)
+
+let register_user =  
+  App.post "/register" (fun request -> 
+    Lwt.bind (Request.to_json_exn request) (fun user_json -> let user_info = user_json |> User.user_of_yojson in 
+    Lwt.bind (User.email_exists user_info.email ()) (fun x -> match x with
+    | Ok true -> Lwt.return (Response.of_plain_text ("Email taken"))
+    | Ok false -> 
+      Lwt.bind (User.username_exists user_info.username ()) (fun y -> match y with
+      | Ok true -> Lwt.return (Response.of_plain_text ("Username taken"))
+      | Ok false -> Lwt.bind (User.add_usr user_info.email user_info.password user_info.username ())
+                    (fun _ -> Lwt.return (Response.of_plain_text ("Success")))
+      | Error e -> Lwt.fail (failwith e))
+    | Error e -> Lwt.fail (failwith e))
+  ) 
+)
 
 (* login_user creates a post request that takes in the json containing the information for a user x and outputs "No User" if x is not in users and a json containing the email and username of x otherwise *)
 let login_user = 
   App.post "/login" (fun request -> 
     Lwt.bind (Request.to_json_exn request) (fun user_json -> let user_info =
       user_json |> User.user_of_yojson in 
-      let rec matchUser (x : User.user list) = match x with
+      Lwt.bind (User.check_password user_info.email user_info.password user_info.username ())(
+        fun x -> match x with
+        | Ok true -> Lwt.bind (User.email_exists user_info.email ()) (fun y -> match y with
+          | Ok true -> Lwt.bind (User.user_of_email user_info.email ()) (fun z -> match z with 
+            | Ok a -> Lwt.return (Response.of_json(`Assoc[("email", `String user_info.email);("username", `String a)]))
+            | Error e -> Lwt.fail (failwith e))
+          | Ok false -> Lwt.bind (User.email_of_user user_info.username ()) (fun b -> match b with 
+          | Ok c -> Lwt.return (Response.of_json(`Assoc[("email", `String c);("username", `String user_info.username)]))
+          | Error e -> Lwt.fail (failwith e))
+          | Error e -> Lwt.fail (failwith e))
+        | Ok false -> Lwt.return (Response.of_plain_text ("No User"))
+        | Error e -> Lwt.fail (failwith e)
+      )
+      (*let rec matchUser (x : User.user list) = match x with
       | [] -> Lwt.return (Response.of_plain_text ("No User"))
       | {username;password;email} :: t -> if username = user_info.username && password = user_info.password then Lwt.return (Response.of_json(`Assoc[("email", `String email);("username", `String username)])) else if email = user_info.email && password = user_info.password then Lwt.return (Response.of_json(`Assoc[("email", `String email);("username", `String username)])) else matchUser t
-    in matchUser !users))
+    in matchUser !users*)
+    ))
 
 (* get_users creates a get request that outputs users for testing purposes *)
 let get_users = 
