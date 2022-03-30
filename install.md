@@ -32,11 +32,49 @@ Since you likely just updated your version of Ocaml, you should reinstall all th
 
 `opam install opium`
 
+`opam install caqti`
+
+`opam install caqti_lwt`
+
+`opam install caqti_driver_postgresql`
+
 Some of these installations may ask for your permission or ask a y/n question. Just enter "y" and continue with the installation.
 
 With Ocaml 4.13.1 and these libraries installed, you should be ready to run our app!
 
 
+## Install Postgresql
+
+But first...you need to install postgresql through your terminal. This will be shown from a MacOS perspective, though some steps are similar to the Ubuntu installation. First, check that you have Homebrew, which will be used to install Postgresql. In your terminal, run:
+
+`brew`
+
+If a series of brew services pops up, you have completed this step. If not, please refer to this installation guide to install Homebrew: https://brew.sh/
+Also, it would be helpful to update it: `brew update`
+Now that we are able to finally move forward, run this simple command to install Postgres:
+
+`brew install postgresql`
+
+Installation might make a while. But once it has been downloaded successfully, we must actually access the datbase system. To do this, run:
+
+`brew services start postgresql`
+
+Great, now the service is running. But we would like to configure it for our use. So we will sign in as the root user which gives us access to admin privileges. In order to do so, run:
+
+`psql postgres`
+
+Welcome to the psql terminal, where PGSQL commands are only allowed. Here, you will make your own user, so input:
+
+`CREATE ROLE <your username> WITH LOGIN PASSWORD 'password';`
+
+Where it says <your username>, enter the specfic username that is used in your normal terminal. For the password, make sure that it is just 'password', just for simplicity reasons. You have now created a user. While still in the psql terminal, you will make a database for your new user. Run:
+
+`CREATE DATABASE <your username>`
+
+To check if you did this correctly, do `\l`, which looks at all registered databases. If you see your username in the table, you did everything correctly! Now it is time to run our web app.
+
+(Don't do this right now, but after running our app, it is helps to stop postgres when you do not use it anymore. When you want to stop it, enter: `brew services stop postgresql`)
+  
 
 # Run Instructions
 
