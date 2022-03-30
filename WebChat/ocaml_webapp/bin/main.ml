@@ -117,10 +117,10 @@ let close_db =
     )
 
 (* cors creates a middleware that fixes cors policy errors that are encountered when trying to make requests to the server*)
-let cors = Middleware.allow_cors ~origins:["*"] ~credentials:false ()
+let cors = Middleware.allow_cors ~origins:["*"] ~credentials:true ()
 
-(* static_content creates a middleware that serves the frontend static files so that the app can be accessed from the browser
-let static_content = Middleware.static_unix ~local_path:(Unix.realpath "frontend/dist") ()*)
+(* static_content creates a middleware that serves the frontend static files so that the app can be accessed from the browser *)
+let static_content = Middleware.static_unix ~local_path:(Unix.realpath "frontend/dist") ()
 
 (* Creates the app with the above functions *)
 let _ =
@@ -128,8 +128,7 @@ let _ =
   |> App.middleware cors
   |> create_db
   |> close_db
-  (*
-  |> App.middleware static_content *)
+  |> App.middleware static_content
   |> register_user
   |> login_user
   |> read_messages

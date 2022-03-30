@@ -18,7 +18,7 @@ export default {
     this.onResize();
   },
   created() {
-    this.$store.commit("logOut");
+    this.$store.dispatch("create");
   }
 }
 
