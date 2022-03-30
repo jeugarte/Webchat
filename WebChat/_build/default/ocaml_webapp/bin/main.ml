@@ -69,7 +69,33 @@ let messages = ref []
 Raises: "no users" if the userid associated with a message is not an email in users (this should not occur as userid should be immutable after registration) *)
 let read_messages = 
   App.get "/getMessages" (fun _ -> 
-    let messages = !messages in
+    Lwt.bind (Storage.read_all ()) (fun x -> match x with
+    | Ok a -> let messages = a in
+    let rec json (x : Storage.message list) = match x with
+    | [] -> Lwt.return []
+    | h1 :: t1 -> 
+      Lwt.bind (User.email_exists h1.senderid ()) (fun y -> match y with 
+    | Ok true -> Lwt.bind (User.user_of_email h1.senderid ()) (fun z -> match z with
+      | Ok b -> Lwt.bind (json t1) (fun s -> match s with 
+        | d -> Lwt.return (`Assoc [("username", `String (b))
+        ;("message", `String h1.msg)] :: d)
+      )
+      | Error e -> Lwt.fail (failwith e))
+    | Ok false -> Lwt.fail (failwith "no users")
+    | Error e -> Lwt.fail (failwith e))  
+      
+      (*let rec find_user (y : User.user list) = match y with
+        | [] -> failwith "no users"
+        | h2 :: t2 -> if h2.email = h1.userid then h2.username else find_user t2 
+      in find_user !users *)
+  in
+    Lwt.bind (json messages) (fun a -> match a with
+    | c -> Lwt.return (Response.of_json (`Assoc [ ("data", `List (c))]))
+    )
+  | Error e -> Lwt.fail (failwith e))
+    
+
+    (*let messages = !messages in
     let rec json (x : Message.message list) = match x with
     | [] -> []
     | h1 :: t1 -> `Assoc [("username", `String (let rec find_user (y : User.user list) = match y with
@@ -78,7 +104,8 @@ let read_messages =
   in find_user !users)); 
     ("message", `String h1.msg)] :: json t1
   in
-    Lwt.return (Response.of_json (`Assoc [ ("data", `List (json messages))])))
+    Lwt.return (Response.of_json (`Assoc [ ("data", `List (json messages))])) *)
+  )
 
 (* post_messages creates a post request that takes in a json containing the username and message of a message and adds a message with the userid/email and message as fields to messages 
 Raises: "no users" if the username in the json does not match the current username of any user in users 
