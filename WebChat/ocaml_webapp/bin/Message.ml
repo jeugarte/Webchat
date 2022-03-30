@@ -1,1 +1,0 @@
-type message = {userid : string; msg : string}
