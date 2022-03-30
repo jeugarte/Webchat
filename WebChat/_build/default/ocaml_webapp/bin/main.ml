@@ -63,7 +63,6 @@ let get_users =
     Lwt.return (Response.of_json (`Assoc [ ("users", `List (json users))])))
 
 (* messages list to store messages locally *)
-let messages = ref []
 
 (* read_messages creates a get request that outputs a json containing the list of messages as objects with username and the message
 Raises: "no users" if the userid associated with a message is not an email in users (this should not occur as userid should be immutable after registration) *)
@@ -113,6 +112,23 @@ Raises: "no users" if the username in the json does not match the current userna
 let post_messages = 
   App.post "/postMessage" (fun request -> 
     Lwt.bind (Request.to_json_exn request) (fun input_json ->
+      let match_user x = match x with 
+      | `Assoc [ ("username", `String username); _ ] -> username
+      | _ -> failwith "invalid message json"
+    in Lwt.bind (User.username_exists (match_user input_json) ()) (fun q -> match q with
+      | Ok true -> Lwt.bind (User.email_of_user (match_user input_json) ()) (fun r -> match r with
+        | Ok a -> Lwt.bind (Storage.add_msg a "all" 
+        (let match_message y = match y with 
+          | `Assoc [ _ ; ("message", `String message)] 
+          -> message
+          | _ -> failwith "invalid message json" in match_message input_json) () ) (fun s -> match s with
+            | Ok () -> Lwt.return (Response.make ~status: `OK ()) 
+            | Error e -> Lwt.fail (failwith e))
+       | Error e -> Lwt.fail (failwith e))
+      | Ok false -> failwith "no users"
+      | Error e -> Lwt.fail (failwith e)
+    )
+(*
     (let rec input_message (x : User.user list) : Message.message = match x with 
     | [] -> failwith "no users"
     | h :: t -> if h.username = (let match_user y = match y with
@@ -125,7 +141,8 @@ let post_messages =
       | _ -> failwith "invalid message json" in match_message input_json)} 
     else 
         input_message t in messages := input_message !users :: !messages); 
-        Lwt.return (Response.make ~status: `OK ())))
+        Lwt.return (Response.make ~status: `OK ()) *)
+    ))
 
 
 (* cors creates a middleware that fixes cors policy errors that are encountered when trying to make requests to the server*)
