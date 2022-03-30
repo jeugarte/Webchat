@@ -10,8 +10,8 @@ open Caqti_request.Infix
 open Caqti_type.Std
 
 type message = {
-  senderid : int;
-  recipientid : int;
+  senderid : string;
+  recipientid : string;
   msg : string
 }
 
@@ -27,26 +27,19 @@ type recipient_message = {
 
 module Message = struct
 
-  type sql_sent_message = {
-    (*senderid : int;
-    recipientid : int;*)
-    sendername : string;
-    recipientname : string;
-    msg : string;
-  }
-
   let create_msglst = unit ->. unit @@ 
     {eos| 
       CREATE TABLE IF NOT EXISTS msglst (
-        id INTEGER PRIMARY KEY,
-        senderid INTEGER NOT NULL,
-        recipientid INTEGER NOT NULL,
-        sendername TEXT NOT NULL,
-        recipientname TEXT NOT NULL,
+        id SERIAL PRIMARY KEY,
+        senderid TEXT NOT NULL,
+        recipientid TEXT NOT NULL,
         msg TEXT NOT NULL,
         timer timestamp
       )
     |eos}
+
+  let drop_msglst = unit ->. unit @@
+    "DROP TABLE msglst"
 
 (*NOT IMPLEMENTED YET BUT USERS WILL HAVE A LIST OF MESSGAES, SO IT IS A ONE OF MANY RELATIONSHIP WHERE ONE USER CAN HAVE MULTIPLE 
 MESSAGES. THATS WHEN WE USE AN ASSOCIATIVE TABLE BUT ILL LOOK INTO THAT*)
@@ -70,10 +63,10 @@ MESSAGES. THATS WHEN WE USE AN ASSOCIATIVE TABLE BUT ILL LOOK INTO THAT*)
     ~decode:(fun (senderid, recipientid, msg) -> Ok {senderid; recipientid; msg}) Caqti_type.(tup3 int int string)) @@ 
     "SELECT * FROM msglst WHERE senderid = ? AND recipientid = ?"
     *)
-  let read_all_sql = unit ->* (Caqti_type.custom ~encode:(fun ({sendername; recipientname; msg} : sql_sent_message)-> 
-    Ok (sendername, recipientname, msg)) 
-    ~decode:(fun (sendername, recipientname, msg) -> Ok {sendername; recipientname; msg}) Caqti_type.(tup3 string string string)) @@ 
-    "SELECT * FROM msglst"
+  let read_all_sql = unit ->* (Caqti_type.custom ~encode:(fun ({senderid; recipientid; msg} : message)-> 
+    Ok (senderid, recipientid, msg)) 
+    ~decode:(fun (senderid, recipientid, msg) -> Ok {senderid; recipientid; msg}) Caqti_type.(tup3 string string string)) @@ 
+    "SELECT senderid, recipientid, msg FROM msglst"
 end
 
 let migrate () = let open Message in
@@ -82,6 +75,11 @@ match result with
 | Ok data -> Lwt.return (Ok data)
 | Error error -> Lwt.fail (failwith (Caqti_error.show error)))
 
+let rollback () = let open Message in
+    Lwt.bind (Db.exec drop_msglst ()) (fun result ->
+match result with
+| Ok data -> Lwt.return (Ok data)
+| Error error -> Lwt.fail (failwith (Caqti_error.show error)))
 
 let add_msg senderid recipientid msg () = let open Message in
   Lwt.bind (Db.exec (add_msg_sql senderid recipientid msg) ()) (fun result ->
@@ -119,9 +117,8 @@ let read_parsed_convo_msgs senderid recipientid () = let open Message in
 *)
 
 let read_all () = let open Message in
-  Lwt.bind (Db.iter_s (read_all_sql) (fun data -> Lwt_io.print 
-  ("Message sent from " ^ data.sendername ^ " to "  ^ data.recipientname ^ ": " ^ data.msg ^ "\n") >>= 
-  Lwt.return_ok) ()) (fun result ->
+  Lwt.bind (Db.fold (read_all_sql) (fun {senderid; recipientid; msg} acc -> 
+  {senderid; recipientid; msg} :: acc) () []) (fun result ->
   match result with
   | Ok data -> Lwt.return (Ok data)
   | Error error -> failwith (Caqti_error.show error))
