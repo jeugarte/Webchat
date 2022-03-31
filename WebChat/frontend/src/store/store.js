@@ -14,11 +14,10 @@ const getters = {
   User: state => state.user
 };
 const actions = {
-  async create({commit}) {
+  async create() {
     await axios.get("create").then(function(response) {
       console.log("Create Database Response: ", response.data);
     });
-    commit('logOut')
   },
   async registerUser({commit}, form) {
     await axios.post("register",

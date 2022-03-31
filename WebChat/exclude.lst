@@ -1,4 +1,6 @@
 _build/*
 tutorial/*
 .DS_Store
+*node_modules/*
 *.zip
+.git/*
