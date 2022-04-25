@@ -1,5 +1,6 @@
 open Opium
 open Ocaml_webapp
+open Unix
 
 (* register_user creates a post request that takes in a json containing the email, password, username of a new user and outputs "Email taken" if users contains the email already, "Username taken" if users contains the username already, and "Success" if the information can be used to create a user that is added to users *)
 let register_user =  
@@ -49,8 +50,10 @@ let get_users =
     Lwt.return (Response.of_json (`Assoc [ ("users", `List (json users))])))
 *)
 
-(* read_messages creates a get request that outputs a json containing the list of messages as objects with username and the message
-Raises: "no users" if the userid associated with a message is not an email in users (this should not occur as userid should be immutable after registration) *)
+(* read_messages creates a get request that outputs a json containing the list of messages 
+as objects with username and the message
+Raises: "no users" if the userid associated with a message is not an email in users 
+  (this should not occur as userid should be immutable after registration) *)
 let read_messages = 
   App.get "/getMessages" (fun _ -> 
     Lwt.bind (Storage.read_all ()) (fun x -> match x with

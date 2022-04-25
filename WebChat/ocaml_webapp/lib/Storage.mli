@@ -1,6 +1,6 @@
 type message = {
   senderid : string;
-  recipientid : string;
+  convoid : string;
   msg : string
 }
 
