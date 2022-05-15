@@ -1,0 +1,3 @@
+(executable
+ (name main)
+ (libraries ocaml_webapp ounit2 opium))

@@ -1,0 +1,3 @@
+(library
+ (public_name ocaml_webapp)
+ (libraries opium caqti caqti-lwt caqti-driver-postgresql))
