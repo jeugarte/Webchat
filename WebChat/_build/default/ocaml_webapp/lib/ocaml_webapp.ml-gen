@@ -1,3 +1,11 @@
+(** @canonical Ocaml_webapp.Contacts *)
+module Contacts = Ocaml_webapp__Contacts
+
+
+(** @canonical Ocaml_webapp.Conversations *)
+module Conversations = Ocaml_webapp__Conversations
+
+
 (** @canonical Ocaml_webapp.Storage *)
 module Storage = Ocaml_webapp__Storage
 
