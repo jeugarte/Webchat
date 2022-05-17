@@ -3,7 +3,9 @@
 (sections (lib .) (libexec .) (bin ../../bin))
 (files
  (lib
-  (Contacts.ml
+  (Bot.ml
+   Bot.mli
+   Contacts.ml
    Contacts.mli
    Conversations.ml
    Conversations.mli
@@ -22,6 +24,10 @@
    ocaml_webapp.cmx
    ocaml_webapp.cmxa
    ocaml_webapp.ml
+   ocaml_webapp__Bot.cmi
+   ocaml_webapp__Bot.cmt
+   ocaml_webapp__Bot.cmti
+   ocaml_webapp__Bot.cmx
    ocaml_webapp__Contacts.cmi
    ocaml_webapp__Contacts.cmt
    ocaml_webapp__Contacts.cmti
@@ -58,6 +64,11 @@
   (wrapped
    (main_module_name Ocaml_webapp)
    (modules
+    ((name Bot)
+     (obj_name ocaml_webapp__Bot)
+     (visibility public)
+     (impl)
+     (intf))
     ((name Contacts)
      (obj_name ocaml_webapp__Contacts)
      (visibility public)

@@ -1,0 +1,1 @@
+val bot_response : string -> int -> string

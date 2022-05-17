@@ -1,3 +1,7 @@
+(** @canonical Ocaml_webapp.Bot *)
+module Bot = Ocaml_webapp__Bot
+
+
 (** @canonical Ocaml_webapp.Contacts *)
 module Contacts = Ocaml_webapp__Contacts
 

@@ -1,4 +1,6 @@
 lib: [
+  "_build/install/default/lib/ocaml_webapp/Bot.ml"
+  "_build/install/default/lib/ocaml_webapp/Bot.mli"
   "_build/install/default/lib/ocaml_webapp/Contacts.ml"
   "_build/install/default/lib/ocaml_webapp/Contacts.mli"
   "_build/install/default/lib/ocaml_webapp/Conversations.ml"
@@ -18,6 +20,10 @@ lib: [
   "_build/install/default/lib/ocaml_webapp/ocaml_webapp.cmx"
   "_build/install/default/lib/ocaml_webapp/ocaml_webapp.cmxa"
   "_build/install/default/lib/ocaml_webapp/ocaml_webapp.ml"
+  "_build/install/default/lib/ocaml_webapp/ocaml_webapp__Bot.cmi"
+  "_build/install/default/lib/ocaml_webapp/ocaml_webapp__Bot.cmt"
+  "_build/install/default/lib/ocaml_webapp/ocaml_webapp__Bot.cmti"
+  "_build/install/default/lib/ocaml_webapp/ocaml_webapp__Bot.cmx"
   "_build/install/default/lib/ocaml_webapp/ocaml_webapp__Contacts.cmi"
   "_build/install/default/lib/ocaml_webapp/ocaml_webapp__Contacts.cmt"
   "_build/install/default/lib/ocaml_webapp/ocaml_webapp__Contacts.cmti"
