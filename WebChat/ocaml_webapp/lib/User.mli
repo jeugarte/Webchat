@@ -10,6 +10,11 @@ type get_user = {
   username : string;
 }
 
+type get_contact_both = {
+  user_email : string;
+  contact_email : string;
+}
+
 type get_userconvo = { email : string }
 
 (* yojson_of_user converts a user type to a json *)
@@ -18,6 +23,7 @@ val yojson_of_user : user -> Yojson.Safe.t
 (* user_of_yojson converts a json to a user type *)
 val user_of_yojson : Yojson.Safe.t -> user
 val usercontact_of_yojson : Yojson.Safe.t -> get_userconvo
+val both_of_yojson : Yojson.Safe.t -> get_contact_both
 val migrate : unit -> (unit, 'a) result Lwt.t
 val rollback : unit -> (unit, 'a) result Lwt.t
 

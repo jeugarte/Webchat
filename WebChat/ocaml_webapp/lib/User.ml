@@ -20,6 +20,11 @@ type get_user = {
 
 type get_userconvo = { email : string }
 
+type get_contact_both = {
+  user_email : string;
+  contact_email : string;
+}
+
 let yojson_of_user (u : user) =
   `Assoc
     [
@@ -42,6 +47,16 @@ let user_of_yojson yojson =
 let usercontact_of_yojson yojson =
   match yojson with
   | `Assoc [ ("email", `String email) ] -> { email }
+  | _ -> failwith "invalid user json"
+
+let both_of_yojson yojson =
+  match yojson with
+  | `Assoc
+      [
+        ("user_email", `String user_email);
+        ("contact_email", `String contact_email);
+      ] ->
+      { user_email; contact_email }
   | _ -> failwith "invalid user json"
 
 module UserQuery = struct
@@ -122,11 +137,15 @@ module UserQuery = struct
     "SELECT * FROM usrlst WHERE email = ? AND password = ? AND username
     = ?" *)
 
-   let get_all_from_userid uuid = unit ->* (Caqti_type.custom
-     ~encode:(fun ({email; username} : get_user)-> Ok (email, username))
-     ~decode:(fun (email, username) -> Ok {email; username})
-     Caqti_type.(tup2 string string)) @@ "SELECT email, username FROM
-     usrlst WHERE id = '" ^ uuid ^ "'" 
+  let get_all_from_userid uuid =
+    unit
+    ->* Caqti_type.custom
+          ~encode:(fun ({ email; username } : get_user) ->
+            Ok (email, username))
+          ~decode:(fun (email, username) -> Ok { email; username })
+          Caqti_type.(tup2 string string)
+    @@ "SELECT email, username FROM\n     usrlst WHERE id = '" ^ uuid
+    ^ "'"
 end
 
 let migrate () =
@@ -181,12 +200,12 @@ let id_from_email email () =
 
 let user_of_email email () =
   let open UserQuery in
-    Lwt.bind
-      (Db.find (get_username email) ())
-      (fun result ->
-        match result with
-        | Ok data -> Lwt.return (Ok data)
-        | Error error -> Lwt.fail (failwith (Caqti_error.show error)))
+  Lwt.bind
+    (Db.find (get_username email) ())
+    (fun result ->
+      match result with
+      | Ok data -> Lwt.return (Ok data)
+      | Error error -> Lwt.fail (failwith (Caqti_error.show error)))
 
 let email_of_user username () =
   let open UserQuery in
@@ -206,8 +225,14 @@ let check_password email password username () =
       | Ok data -> Lwt.return (Ok data)
       | Error error -> Lwt.fail (failwith (Caqti_error.show error)))
 
- let read_all_given_id id () = let open UserQuery in Lwt.bind (Db.fold
-   (get_all_from_userid (string_of_int id)) (fun {email; username} acc -> {email;
-   username} :: acc) () []) (fun result -> match result with | Ok data
-   -> Lwt.return (Ok data) | Error error -> failwith (Caqti_error.show
-   error))
+let read_all_given_id id () =
+  let open UserQuery in
+  Lwt.bind
+    (Db.fold
+       (get_all_from_userid (string_of_int id))
+       (fun { email; username } acc -> { email; username } :: acc)
+       () [])
+    (fun result ->
+      match result with
+      | Ok data -> Lwt.return (Ok data)
+      | Error error -> failwith (Caqti_error.show error))
