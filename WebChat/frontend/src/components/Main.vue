@@ -1,13 +1,17 @@
 <template>
-  <div class = "container" v-bind:style = "{minHeight: $store.getters.WindowHeight + 'px'}">
-    <div class = "past-messages">
-      <div class = "view-box" ref = "viewBox">
-        <div v-for = "message in pastMessages" v-bind:key = "message.message" v-bind:class = "message.username === user.username ? 'me' : ''"><p>{{ message.message }}</p><span class = "name">{{ message.username }}</span></div>
+  <div class="container" v-bind:style="{ minHeight: $store.getters.WindowHeight + 'px' }">
+    <div class="past-messages">
+      <div class="view-box" ref="viewBox">
+        <div v-for="message in pastMessages" v-bind:key="message.message"
+          v-bind:class="message.username === user.username ? 'me' : ''">
+          <p>{{ message.message }}</p><span class="name">{{ message.username }}</span>
+        </div>
       </div>
     </div>
-    <div class = "inputs">
-      <textarea v-on:keydown.enter.exact.prevent v-on:keyup.enter.exact = "postMessage" v-model = "newMessage" placeholder = "New Message"></textarea>
-      <button v-on:click = "postMessage" title = "Enter"><i class = "fa fa-paper-plane"></i></button>
+    <div class="inputs">
+      <textarea v-on:keydown.enter.exact.prevent v-on:keyup.enter.exact="postMessage" v-model="newMessage"
+        placeholder="New Message"></textarea>
+      <button v-on:click="postMessage" title="Enter"><i class="fa fa-paper-plane"></i></button>
     </div>
   </div>
 </template>
@@ -32,20 +36,20 @@ export default {
     })
   },
   methods: {
-    postMessage: async function() {
+    postMessage: async function () {
       if (this.newMessage !== "") {
-        await axios.post("postMessage", {username: this.user.username, message: this.newMessage});
+        await axios.post("postMessageBot", { username: this.user.username, message: this.newMessage });
         this.newMessage = "";
         await this.getMessages();
       }
     },
-    getMessages: async function() {
+    getMessages: async function () {
       let self = this;
       let oldMessagesLength = this.pastMessages.length;
-      await axios.get("getMessages").then(function(response) {
+      await axios.get("getMessages").then(function (response) {
         self.pastMessages = response.data.data.reverse();
         if (self.pastMessages.length > oldMessagesLength) {
-          window.setTimeout(function() {
+          window.setTimeout(function () {
             self.$refs.viewBox.scrollTop = self.$refs.viewBox.scrollHeight;
           }, 0);
         }
@@ -55,7 +59,7 @@ export default {
   mounted() {
     let self = this;
     this.getMessages();
-    window.setTimeout(function() {
+    window.setTimeout(function () {
       this.$refs.viewBox.scrollTop = this.$refs.viewBox.scrollHeight;
     }, 0);
     console.log(this.user);
@@ -65,7 +69,6 @@ export default {
 </script>
 
 <style scoped>
-
 .container {
   width: 100%;
   position: relative;
@@ -172,5 +175,4 @@ export default {
   color: white;
   cursor: pointer;
 }
-
 </style>

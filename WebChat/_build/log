@@ -3,7 +3,11 @@
 # Shared cache: disabled
 # Workspace root: /home/jeu9/cs3110/WebChat/webchat/WebChat
 # Auto-detected concurrency: 8
+<<<<<<< HEAD
 $ /home/jeu9/.opam/cs3110-2021fa/bin/ocamlc.opt -config > /tmp/dune_b4af4f_output
+=======
+$ /Users/owenwetherbee/.opam/4.13.1/bin/ocamlc.opt -config > /var/folders/qg/fdmh1mfn5nv0r_xnlr2ghlyw0000gn/T/dune_4458ac_output
+>>>>>>> dc034d5913ab945a8fe8416ba3b2e63b553dfd00
 # Dune context:
 #  { name = "default"
 #  ; kind = "default"

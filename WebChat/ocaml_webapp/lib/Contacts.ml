@@ -14,7 +14,7 @@ type contact = {
   favorite : bool;
 }
 
-type get_contact = {
+(* type get_contact = {
   user_id : int;
   contact_id : int;
   favorite : bool;

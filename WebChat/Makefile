@@ -14,6 +14,7 @@ clean:
 	pkill -f _build/default/ocaml_webapp/bin/main.exe || true
 
 serve:
+	dune build
 	pkill -f _build/default/ocaml_webapp/bin/main.exe || true
 	OCAMLRUNPARAM=b dune exec ocaml_webapp/bin/main.exe &
 	npm run --prefix frontend serve
