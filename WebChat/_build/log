@@ -1,9 +1,9 @@
-# dune exec ocaml_webapp/bin/main.exe
+# dune exec ocaml_webapp/test/main.exe
 # OCAMLPARAM: unset
 # Shared cache: disabled
 # Workspace root: /Users/stanleyjiang/cs3110/webchat/WebChat
 # Auto-detected concurrency: 8
-$ /Users/stanleyjiang/.opam/cs3110-2022sp/bin/ocamlc.opt -config > /var/folders/rz/6r_wzlv10dzfyx9490vs44800000gn/T/dune_1e3196_output
+$ /Users/stanleyjiang/.opam/cs3110-2022sp/bin/ocamlc.opt -config > /var/folders/rz/6r_wzlv10dzfyx9490vs44800000gn/T/dune_038b3e_output
 # Dune context:
 #  { name = "default"
 #  ; kind = "default"

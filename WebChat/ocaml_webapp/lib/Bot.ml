@@ -1,68 +1,92 @@
 let rand_of_var v = if v = 4 then Random.int 4 else v
 
+let rec first_punc l1 =
+  match l1 with
+  | [] -> 1
+  | h :: t -> (
+      match h.[String.length h - 1] with
+      | '.' -> 2
+      | '!' -> 3
+      | '?' -> 4
+      | _ -> first_punc t)
+
+let remove_punc s =
+  match s.[String.length s - 1] with
+  | '.' -> String.sub s 0 (String.length s - 1)
+  | '!' -> String.sub s 0 (String.length s - 1)
+  | '?' -> String.sub s 0 (String.length s - 1)
+  | ',' -> String.sub s 0 (String.length s - 1)
+  | _ -> s
+
+let rec key_word l2 =
+  match l2 with
+  | [] -> 1
+  | h :: t -> (
+      match remove_punc h with
+      | "joke" -> 2
+      | "you" -> 3
+      | "im" -> 4
+      | _ -> key_word t)
+
+let first_word l3 =
+  match remove_punc (List.hd l3) with
+  | "does" -> 2
+  | "are" -> 2
+  | "is" -> 2
+  | "was" -> 2
+  | "have" -> 2
+  | "do" -> 2
+  | "did" -> 2
+  | "can" -> 2
+  | "should" -> 2
+  | "may" -> 2
+  | "who" -> 3
+  | "what" -> 3
+  | "when" -> 3
+  | "where" -> 3
+  | "why" -> 3
+  | "how" -> 3
+  | "which" -> 3
+  | "what's" -> 3
+  | "how's" -> 3
+  | "when's" -> 3
+  | "who's" -> 3
+  | _ -> 1
+
+let strlist s =
+  List.filter
+    (fun a -> a <> "")
+    (String.split_on_char ' '
+       (s |> String.trim |> String.lowercase_ascii))
+
+let rec rec_strlist l =
+  match l with
+  | [] -> failwith "no matching string"
+  | h :: t -> ( match h with "im" -> t | _ -> rec_strlist t)
+
 let bot_response s rand_var =
-  let rec first_punc l1 =
-    match l1 with
-    | [] -> 1
-    | h :: t -> (
-        match h.[String.length h - 1] with
-        | '.' -> 2
-        | '!' -> 3
-        | '?' -> 4
-        | _ -> first_punc t)
-  in
-  let rec key_word l2 =
-    match l2 with
-    | [] -> 1
-    | h :: t -> (
-        match h with "joke" -> 2 | "you" -> 3 | _ -> key_word t)
-  in
-  let first_word l3 =
-    match List.hd l3 with
-    | "i'm" -> 1
-    | "im" -> 1
-    | "does" -> 2
-    | "are" -> 2
-    | "is" -> 2
-    | "was" -> 2
-    | "have" -> 2
-    | "do" -> 2
-    | "did" -> 2
-    | "can" -> 2
-    | "should" -> 2
-    | "may" -> 2
-    | "who" -> 3
-    | "what" -> 3
-    | "when" -> 3
-    | "where" -> 3
-    | "why" -> 3
-    | "how" -> 3
-    | "which" -> 3
-    | "what's" -> 3
-    | "how's" -> 3
-    | "when's" -> 3
-    | "who's" -> 3
-    | _ -> 4
-  in
-  let strlist =
-    List.filter
-      (fun a -> a <> "")
-      (String.split_on_char ' '
-         (s |> String.trim |> String.lowercase_ascii))
-  in
-  match (first_punc strlist, key_word strlist, first_word strlist) with
-  | _, _, 1 ->
-      List.fold_left (fun a b -> a ^ " " ^ b) "Hi" (List.tl strlist)
+  match
+    ( first_punc (strlist s),
+      key_word (strlist s),
+      first_word (strlist s) )
+  with
+  | _, 4, _ ->
+      List.fold_left
+        (fun a b -> a ^ " " ^ b)
+        "Hi"
+        (rec_strlist (strlist s))
       ^ ". I'm Bob!"
   | 4, _, 2 -> (
       match rand_of_var rand_var with
       | 0 -> "Yes"
       | 1 -> "No"
+      | 2 -> "Most likely"
       | _ -> "Maybe")
   | 1, 3, 2 -> (
       match rand_of_var rand_var with
       | 0 -> "Yes"
       | 1 -> "No"
+      | 2 -> "Most likely"
       | _ -> "Maybe")
   | _, _, 3 -> (
       match rand_of_var rand_var with
@@ -145,7 +169,7 @@ let bot_response s rand_var =
       match rand_of_var rand_var with
       | 0 -> "Nice!"
       | 1 -> "Cool!"
-      | 2 -> "Alrighty."
+      | 2 -> "Alrighty!"
       | _ -> "Big!")
   | 2, _, _ -> (
       match rand_of_var rand_var with
