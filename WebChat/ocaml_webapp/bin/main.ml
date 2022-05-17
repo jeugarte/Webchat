@@ -109,6 +109,82 @@ let rec convo_helper lst =
               | _ -> failwith "only one element")
           | Error e -> Lwt.fail (failwith e))
 
+let rec gen_user_convos convoid userlist creatorid =
+  match userlist with
+  | [] -> Lwt.return (Response.of_plain_text "Success")
+  | h :: t ->
+      Lwt.bind (User.id_from_email h ()) (fun uid ->
+          match uid with
+          | Ok cur_user ->
+              Lwt.bind
+                (Contacts.does_contact_exist creatorid cur_user ())
+                (fun exists ->
+                  match exists with
+                  | Ok true ->
+                      Lwt.bind
+                        (UserConversation.insert_user_conversation
+                           convoid cur_user ()) (fun response ->
+                          match response with
+                          | Ok () -> gen_user_convos convoid t creatorid
+                          | Error e -> Lwt.fail (failwith e))
+                  | Ok false ->
+                      Lwt.return (Response.of_plain_text "Failure")
+                  | Error e -> Lwt.fail (failwith e))
+          | Error e -> Lwt.fail (failwith e))
+
+let make_conversation =
+  App.post "/makeConversation" (fun request ->
+      Lwt.bind (Request.to_json_exn request) (fun input_json ->
+          let convo_creator_pair x =
+            match x with
+            | `Assoc
+                [
+                  ("conversation_name", `String convo);
+                  ("creator_name", `String creator);
+                  _;
+                ] ->
+                (convo, creator)
+            | _ -> failwith "invalid convo"
+          in
+          let user_list (y : Yojson.Safe.t) =
+            match y with
+            | `Assoc [ _; _; ("contacts", `List contacts) ] -> contacts
+            | _ -> failwith "invalid convo"
+          in
+          let rec parse_user_list (z : Yojson.Safe.t list) =
+            match z with
+            | [] -> []
+            | `String (user : string) :: t -> user :: parse_user_list t
+            | _ -> failwith "invalid"
+          in
+          Lwt.bind
+            (User.id_from_email
+               (snd (convo_creator_pair input_json))
+               ())
+            (fun response ->
+              match response with
+              | Ok creatorid ->
+                  Lwt.bind
+                    (Conversations.insert_convo
+                       (fst (convo_creator_pair input_json))
+                       (snd (convo_creator_pair input_json))
+                       ())
+                    (fun create_response ->
+                      match create_response with
+                      | Ok id ->
+                          Lwt.bind
+                            (UserConversation.insert_user_conversation
+                               id creatorid ()) (fun response ->
+                              match response with
+                              | Ok () ->
+                                  gen_user_convos id
+                                    (input_json |> user_list
+                                   |> parse_user_list)
+                                    creatorid
+                              | Error e -> Lwt.fail (failwith e))
+                      | Error e -> Lwt.fail (failwith e))
+              | Error e -> Lwt.fail (failwith e))))
+
 (** [get_conversations] returns the conversations of a specfic user RI:
     takes in a user id*)
 let get_conversations =
@@ -513,4 +589,4 @@ let _ =
   |> register_user
   |> login_user |> read_messages |> post_messages |> post_messages_bot
   |> add_contact |> get_contacts |> get_conversations |> make_favorite
-  |> App.run_command
+  |> make_conversation |> App.run_command

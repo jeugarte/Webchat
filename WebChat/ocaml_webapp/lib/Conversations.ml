@@ -60,6 +60,14 @@ module Conversations = struct
           Caqti_type.(tup3 int string string)
     @@ "SELECT id, convo_name, creator_name FROM convolst WHERE id = "
     ^ uuid
+
+  let get_id_from_convo_name convo_name =
+    unit
+    ->! Caqti_type.custom
+          ~encode:(fun s -> Ok s)
+          ~decode:(fun s -> Ok s)
+          Caqti_type.int
+    @@ "select id from usrlst where convo_name = '" ^ convo_name ^ "'"
 end
 
 let migrate () =
@@ -82,7 +90,14 @@ let insert_convo cname creator () =
     (Db.exec (add_convo cname creator) ())
     (fun result ->
       match result with
-      | Ok data -> Lwt.return (Ok data)
+      | Ok () ->
+          Lwt.bind
+            (Db.find (get_id_from_convo_name cname) ())
+            (fun response ->
+              match response with
+              | Ok id -> Lwt.return (Ok id)
+              | Error error ->
+                  Lwt.fail (failwith (Caqti_error.show error)))
       | Error error -> Lwt.fail (failwith (Caqti_error.show error)))
 
 let get_convo_name_from_id id () =
