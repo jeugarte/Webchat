@@ -28,8 +28,8 @@ module Conversations = struct
 
   let add_convo cname creator =
     (unit ->. unit)
-    @@ "INSERT INTO convolst (convo_name, creator) VALUES ('" ^ cname
-    ^ "', '" ^ creator ^ "')"
+    @@ "INSERT INTO convolst (convo_name, creator_name) VALUES ('"
+    ^ cname ^ "', '" ^ creator ^ "')"
 
   let get_convo_name gc_id =
     unit
@@ -37,7 +37,7 @@ module Conversations = struct
           ~encode:(fun s -> Ok s)
           ~decode:(fun s -> Ok s)
           Caqti_type.string
-    @@ "SELECT convo_name FROM convolst WHERE id = " ^ gc_id
+    @@ "SELECT convo_name FROM convolst WHERE id = '" ^ gc_id ^ "'"
 
   let get_creator gc_id =
     unit
@@ -45,7 +45,7 @@ module Conversations = struct
           ~encode:(fun s -> Ok s)
           ~decode:(fun s -> Ok s)
           Caqti_type.string
-    @@ "SELECT creator FROM convolst WHERE id = " ^ gc_id
+    @@ "SELECT creator_name FROM convolst WHERE id = '" ^ gc_id ^ "'"
 
   let get_conversation_from_id uuid =
     unit
@@ -58,8 +58,8 @@ module Conversations = struct
             (fun (conversation_id, conversation_name, creator_id) ->
             Ok { conversation_id; conversation_name; creator_id })
           Caqti_type.(tup3 int string string)
-    @@ "SELECT id, convo_name, creator_name FROM convolst WHERE id = "
-    ^ uuid
+    @@ "SELECT id, convo_name, creator_name FROM convolst WHERE id = '"
+    ^ uuid ^ "'"
 end
 
 let migrate () =

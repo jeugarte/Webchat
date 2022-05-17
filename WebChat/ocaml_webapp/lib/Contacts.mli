@@ -19,9 +19,7 @@ val insert_contact :
 
 val get_contacts_from_userid : int -> unit -> (string, 'a) result Lwt.t
 val get_favorites : int -> unit -> (string, 'a) result Lwt.t
-
-val update_make_favorite :
-  int -> int -> unit -> (string, 'a) result Lwt.t
+val update_make_favorite : int -> int -> unit -> (unit, 'a) result Lwt.t
 
 val update_remove_favorite :
   int -> int -> unit -> (string, 'a) result Lwt.t

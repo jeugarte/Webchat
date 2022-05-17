@@ -27,8 +27,8 @@ module UserConversation = struct
 
   let add_userconvo convoid userid =
     (unit ->. unit)
-    @@ "INSERT INTO userconvolst (convoid, userid) VALUES (" ^ convoid
-    ^ ", " ^ userid ^ ")"
+    @@ "INSERT INTO userconvolst (conversation_id, users_id) VALUES ('"
+    ^ convoid ^ "', '" ^ userid ^ "')"
 
   let get_convoid_from_userid userid =
     unit
@@ -36,7 +36,7 @@ module UserConversation = struct
           ~encode:(fun s -> Ok s)
           ~decode:(fun s -> Ok s)
           Caqti_type.string
-    @@ "SELECT conversation_id FROM userconvolst WHERE user_id = '"
+    @@ "SELECT conversation_id FROM userconvolst WHERE users_id = '"
     ^ userid ^ "'"
 
   let get_convoid_from_userid2 id =
@@ -48,8 +48,8 @@ module UserConversation = struct
           ~decode:(fun (conversation_id, user_id) ->
             Ok { conversation_id; user_id })
           Caqti_type.(tup2 int int)
-    @@ "SELECT conversation_id, user_id FROM userconvolst WHERE userid \
-        = '" ^ id ^ "'"
+    @@ "SELECT conversation_id, users_id FROM userconvolst WHERE \
+        users_id = '" ^ id ^ "'"
 
   let get_userid_from_convo convo =
     unit
@@ -57,7 +57,7 @@ module UserConversation = struct
           ~encode:(fun s -> Ok s)
           ~decode:(fun s -> Ok s)
           Caqti_type.string
-    @@ "SELECT userid FROM userconvolst WHERE conversation_id = '"
+    @@ "SELECT users_id FROM userconvolst WHERE conversation_id = '"
     ^ convo ^ "'"
 end
 
