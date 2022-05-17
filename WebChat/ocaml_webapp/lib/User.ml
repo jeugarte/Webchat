@@ -57,9 +57,9 @@ module UserQuery = struct
   ~decode:(fun s -> Ok s) Caqti_type.string) @@ 
     "select email from usrlst where username = '" ^ username ^ "'"
 
-  let get_id_from_email email = unit ->! (Caqti_type.custom ~encode:(fun s -> Ok s) 
+  (* let get_id_from_email email = unit ->! (Caqti_type.custom ~encode:(fun s -> Ok s) 
   ~decode:(fun s -> Ok s) Caqti_type.string) @@ 
-    "select id from usrlst where email = '" ^ email ^ "'"
+    "select id from usrlst where email = '" ^ email ^ "'" *)
 
   let query_password email password username = unit ->! (Caqti_type.custom ~encode:(fun boolean -> Ok boolean) 
   ~decode:(fun boolean -> Ok boolean) Caqti_type.bool) @@ 

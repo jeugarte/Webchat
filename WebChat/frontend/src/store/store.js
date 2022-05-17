@@ -15,9 +15,8 @@ const getters = {
 };
 const actions = {
   async create() {
-    await axios.get("create").then(function(response) {
-      console.log("Create Database Response: ", response.data);
-    });
+    await axios.get("close");
+    await axios.get("create");
   },
   async registerUser({commit}, form) {
     await axios.post("register",

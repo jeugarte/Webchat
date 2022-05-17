@@ -14,4 +14,4 @@ val get_convo_name_from_id :  int -> unit -> (string, 'a) result Lwt.t
 
 val get_creator_from_id :  int -> unit -> (string, 'a) result Lwt.t
 
-(*val read_all : unit -> (conversation list, 'a) result Lwt.t*)
+(* val read_all : unit -> (conversation list, 'a) result Lwt.t *)
