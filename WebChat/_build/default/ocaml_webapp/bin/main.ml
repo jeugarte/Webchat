@@ -321,6 +321,10 @@ let post_messages_bot =
               | Ok false -> failwith "no users"
               | Error e -> Lwt.fail (failwith e))))
 
+let bind_functions fun1 fun2 =
+  Lwt.bind fun1 (fun a ->
+      match a with Ok () -> fun2 | Error e -> Lwt.fail (failwith e))
+
 let create_db =
   App.get "/create" (fun _ ->
       Lwt.bind (User.migrate ()) (fun a ->
@@ -334,32 +338,46 @@ let create_db =
                            "asldfjaskdl" "Bob-bot" ()) (fun c ->
                           match c with
                           | Ok () ->
-                              Lwt.bind (Storage.migrate ()) (fun b ->
-                                  match b with
-                                  | Ok () ->
-                                      Lwt.return
-                                        (Response.make ~status:`OK ())
-                                  | Error e -> Lwt.fail (failwith e))
+                              bind_functions (Storage.migrate ())
+                                (bind_functions (Contacts.migrate ())
+                                   (bind_functions
+                                      (Conversations.migrate ())
+                                      (bind_functions
+                                         (UserConversation.migrate ())
+                                         (Lwt.return
+                                            (Response.make ~status:`OK
+                                               ())))))
                           | Error e -> Lwt.fail (failwith e))
                   | Ok false ->
-                      Lwt.bind (Storage.migrate ()) (fun e ->
-                          match e with
-                          | Ok () ->
-                              Lwt.return (Response.make ~status:`OK ())
-                          | Error e -> Lwt.fail (failwith e))
+                      bind_functions (Storage.migrate ())
+                        (bind_functions (Contacts.migrate ())
+                           (bind_functions
+                              (Conversations.migrate ())
+                              (bind_functions
+                                 (UserConversation.migrate ())
+                                 (Lwt.return
+                                    (Response.make ~status:`OK ())))))
+                      (* Lwt.bind (Storage.migrate ()) (fun e -> match e
+                         with | Ok () -> Lwt.return (Response.make
+                         ~status:`OK ()) | Error e -> Lwt.fail (failwith
+                         e)) *)
                   | Error e -> Lwt.fail (failwith e))
           | Error e -> Lwt.fail (failwith e)))
 
 let close_db =
   App.get "/close" (fun _ ->
-      Lwt.bind (User.rollback ()) (fun a ->
-          match a with
-          | Ok () ->
-              Lwt.bind (Storage.rollback ()) (fun b ->
-                  match b with
-                  | Ok () -> Lwt.return (Response.make ~status:`OK ())
-                  | Error e -> Lwt.fail (failwith e))
-          | Error e -> Lwt.fail (failwith e)))
+      bind_functions (User.rollback ())
+        (bind_functions (Storage.rollback ())
+           (bind_functions (Contacts.rollback ())
+              (bind_functions
+                 (Conversations.rollback ())
+                 (bind_functions
+                    (UserConversation.rollback ())
+                    (Lwt.return (Response.make ~status:`OK ()))))))
+      (* Lwt.bind (User.rollback ()) (fun a -> match a with | Ok () ->
+         Lwt.bind (Storage.rollback ()) (fun b -> match b with | Ok ()
+         -> Lwt.return (Response.make ~status:`OK ()) | Error e ->
+         Lwt.fail (failwith e)) | Error e -> Lwt.fail (failwith e))) *))
 
 (* cors creates a middleware that fixes cors policy errors that are
    encountered when trying to make requests to the server*)
