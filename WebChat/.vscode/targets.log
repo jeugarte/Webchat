@@ -8,7 +8,7 @@ make: *** No rule to make target 'all'.  Stop.
 # This is free software: you are free to change and redistribute it.
 # There is NO WARRANTY, to the extent permitted by law.
 
-# Make data base, printed on Mon May 16 20:56:53 2022
+# Make data base, printed on Tue May 17 02:43:49 2022
 
 # Variables
 
@@ -63,7 +63,7 @@ NVM_BIN = /home/jeu9/.nvm/versions/node/v16.14.0/bin
 # environment
 VSCODE_LOG_STACK = false
 # environment
-VSCODE_IPC_HOOK_CLI = /tmp/vscode-ipc-b24a7987-0d4f-4fb5-ad38-83b7e7064042.sock
+VSCODE_IPC_HOOK_CLI = /tmp/vscode-ipc-47809f4d-443d-4585-8c80-2b3514bbf931.sock
 # default
 .FEATURES := target-specific order-only second-expansion else-if shortest-stem undefine oneshell archives jobserver output-sync check-symlink load
 # environment
@@ -204,7 +204,7 @@ all:
 # Not a target:
 Makefile:
 #  Implicit rule search has been done.
-#  Last modified 2022-03-30 18:21:47.269548
+#  Last modified 2022-05-16 21:04:02.2427969
 #  File has been updated.
 #  Successfully updated.
 
@@ -213,7 +213,7 @@ test:
 #  Implicit rule search has not been done.
 #  File does not exist.
 #  File has not been updated.
-#  recipe to execute (from 'Makefile', line 22):
+#  recipe to execute (from 'Makefile', line 23):
 	OCAMLRUNPARAM=b dune exec ocaml_webapp/test/main.exe
 
 build:
@@ -256,6 +256,7 @@ serve:
 #  Modification time never checked.
 #  File has not been updated.
 #  recipe to execute (from 'Makefile', line 17):
+	dune build
 	pkill -f _build/default/ocaml_webapp/bin/main.exe || true
 	OCAMLRUNPARAM=b dune exec ocaml_webapp/bin/main.exe &
 	npm run --prefix frontend serve
@@ -274,6 +275,6 @@ serve:
 # strcache performance: lookups = 46 / hit rate = 28%
 # hash-table stats:
 # Load=33/8192=0%, Rehash=0, Collisions=1/46=2%
-# Finished Make data base on Mon May 16 20:56:53 2022
+# Finished Make data base on Tue May 17 02:43:49 2022
 
  

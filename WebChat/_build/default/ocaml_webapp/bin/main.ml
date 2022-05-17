@@ -82,43 +82,109 @@ let login_user =
                   Lwt.return (Response.of_plain_text "No User")
               | Error e -> Lwt.fail (failwith e))))
 
-(* let rec convo_helper lst = let open Conversations in let open
-   UserConversation in match lst with | [] -> Lwt.return [] | h :: t ->
-   Lwt.bind (read_conversation_given_id h.conversation_id ()) (fun
-   response -> match response with | Ok one_convo -> ( match one_convo
-   with | [] -> failwith "DNE" | [ h2 ] -> Lwt.bind (convo_helper t)
-   (fun s -> match s with | d -> Lwt.return (`Assoc [ (
-   "conversation_name", `String h2.conversation_name ); ("creator_name",
-   `String h2.creator_id); ] :: d)) | _ -> failwith "only one element")
-   | Error e -> Lwt.fail (failwith e)) *)
+let rec convo_helper lst =
+  let open Conversations in
+  let open UserConversation in
+  match lst with
+  | [] -> Lwt.return []
+  | h :: t ->
+      Lwt.bind (read_conversation_given_id h.conversation_id ())
+        (fun response ->
+          match response with
+          | Ok one_convo -> (
+              match one_convo with
+              | [] -> failwith "DNE"
+              | [ h2 ] ->
+                  Lwt.bind (convo_helper t) (fun s ->
+                      match s with
+                      | d ->
+                          Lwt.return
+                            (`Assoc
+                               [
+                                 ( "conversation_name",
+                                   `String h2.conversation_name );
+                                 ("creator_name", `String h2.creator_id);
+                               ]
+                            :: d))
+              | _ -> failwith "only one element")
+          | Error e -> Lwt.fail (failwith e))
 
 (** [get_conversations] returns the conversations of a specfic user RI:
     takes in a user id*)
-(* let get_conversations (user : int) = let open UserConversation in
-   App.get "/getConversations" (fun _ -> Lwt.bind
-   (read_conversations_given_user user ()) (fun convoids -> match
-   convoids with | Ok convolst -> Lwt.bind (convo_helper convolst) (fun
-   return -> match return with | json_return -> Lwt.return
-   (Response.of_json (`Assoc [ ("data", `List json_return) ]))) | Error
-   e -> Lwt.fail (failwith e))) *)
+let get_conversations =
+  let open UserConversation in
+  let open User in
+  App.post "/getConversations" (fun request ->
+      Lwt.bind (Request.to_json_exn request) (fun contact_json ->
+          let users_info = contact_json |> usercontact_of_yojson in
+          Lwt.bind (id_from_email users_info.email ()) (fun response ->
+              match response with
+              | Ok userid ->
+                  Lwt.bind (read_conversations_given_user userid ())
+                    (fun convoids ->
+                      match convoids with
+                      | Ok convolst ->
+                          Lwt.bind (convo_helper convolst)
+                            (fun return ->
+                              match return with
+                              | json_return ->
+                                  Lwt.return
+                                    (Response.of_json
+                                       (`Assoc
+                                         [ ("data", `List json_return) ])))
+                      | Error e -> Lwt.fail (failwith e))
+              | Error e2 -> Lwt.fail (failwith e2))))
 
-(* let rec contacts_helper lst = let open Contacts in let open User in
-   match lst with | [] -> Lwt.return [] | h :: t -> Lwt.bind
-   (read_all_given_id h.contact_id ()) (fun response -> match response
-   with | Ok one_contact -> ( match one_contact with | [] -> failwith
-   "DNE" | [ h2 ] -> Lwt.bind (contacts_helper t) (fun s -> match s with
-   | d -> Lwt.return (`Assoc [ ("email", `String h2.email); ("username",
-   `String h2.username); ] :: d)) | _ -> failwith "only one element") |
-   Error e -> Lwt.fail (failwith e)) *)
+let rec contacts_helper lst =
+  let open Contacts in
+  let open User in
+  match lst with
+  | [] -> Lwt.return []
+  | h :: t ->
+      Lwt.bind (read_all_given_id h.contact_id ()) (fun response ->
+          match response with
+          | Ok one_contact -> (
+              match one_contact with
+              | [] -> failwith "DNE"
+              | [ h2 ] ->
+                  Lwt.bind (contacts_helper t) (fun s ->
+                      match s with
+                      | d ->
+                          Lwt.return
+                            (`Assoc
+                               [
+                                 ("email", `String h2.email);
+                                 ("username", `String h2.username);
+                               ]
+                            :: d))
+              | _ -> failwith "only one element")
+          | Error e -> Lwt.fail (failwith e))
 
 (** [get_contacts] returns an association list of a user's contacts with
     their email and username RI: takes in a user id*)
-(* let get_contacts (user : int) = let open Contacts in App.get
-   "/getContacts" (fun _ -> Lwt.bind (read_contacts_given_userid user
-   ()) (fun response -> match response with | Ok contacts -> Lwt.bind
-   (contacts_helper contacts) (fun return -> match return with |
-   json_return -> Lwt.return (Response.of_json (`Assoc [ ("data", `List
-   json_return) ]))) | Error e -> Lwt.fail (failwith e))) *)
+let get_contacts =
+  let open User in
+  let open Contacts in
+  App.post "/getContacts" (fun request ->
+      Lwt.bind (Request.to_json_exn request) (fun contact_json ->
+          let users_info = contact_json |> usercontact_of_yojson in
+          Lwt.bind (id_from_email users_info.email ()) (fun response ->
+              match response with
+              | Ok userid ->
+                  Lwt.bind (read_contacts_given_userid userid ())
+                    (fun response ->
+                      match response with
+                      | Ok contacts ->
+                          Lwt.bind (contacts_helper contacts)
+                            (fun return ->
+                              match return with
+                              | json_return ->
+                                  Lwt.return
+                                    (Response.of_json
+                                       (`Assoc
+                                         [ ("data", `List json_return) ])))
+                      | Error e -> Lwt.fail (failwith e))
+              | Error e2 -> Lwt.fail (failwith e2))))
 
 (** [create_conversation] returns success if the conversation with given
     user ids was created; Failure otherwise. RI: takes in a list of user
@@ -132,26 +198,75 @@ let login_user =
     "contact does not exist" or an Lwt error RI: user and contact are
     ids represented as ids*)
 
-(* let make_favorite user contact = let open Contacts in App.post
-   "/makeFavorite" (fun _ -> Lwt.bind (does_contact_exist user contact
-   ()) (fun response -> match response with | Ok true -> Lwt.bind
-   (update_make_favorite user contact ()) (fun update -> match update
-   with | Ok _ -> Lwt.return (Response.of_plain_text "Success") | Error
-   e -> Lwt.fail (failwith e)) | Ok false -> failwith "contact does not
-   exist" | Error e -> Lwt.fail (failwith e))) *)
+let make_favorite =
+  let open User in
+  let open Contacts in
+  App.post "/makeFavorite" (fun request ->
+      Lwt.bind (Request.to_json_exn request) (fun contact_json ->
+          let both_info = contact_json |> both_of_yojson in
+          Lwt.bind (id_from_email both_info.user_email ())
+            (fun user_response ->
+              match user_response with
+              | Ok userid ->
+                  Lwt.bind (id_from_email both_info.contact_email ())
+                    (fun contact_response ->
+                      match contact_response with
+                      | Ok contactid ->
+                          Lwt.bind
+                            (does_contact_exist userid contactid ())
+                            (fun response ->
+                              match response with
+                              | Ok true ->
+                                  Lwt.bind
+                                    (update_make_favorite userid
+                                       contactid ()) (fun update ->
+                                      match update with
+                                      | Ok _ ->
+                                          Lwt.return
+                                            (Response.of_plain_text
+                                               "Success")
+                                      | Error e -> Lwt.fail (failwith e))
+                              | Ok false ->
+                                  failwith "contact does notexist"
+                              | Error e -> Lwt.fail (failwith e))
+                      | Error e1 -> Lwt.fail (failwith e1))
+              | Error e2 -> Lwt.fail (failwith e2))))
 
-(* let add_contact user = let open Contacts in let open User in App.post
-   "/addContact" (fun request -> Lwt.bind (Request.to_json_exn request)
-   (fun contact_json -> let contact_info = contact_json |>
-   User.user_of_yojson in Lwt.bind (id_from_email contact_info.email ())
-   (fun accepted -> match accepted with | Ok contact_id -> Lwt.bind
-   (does_contact_exist user contact_id ()) (fun existing_responses ->
-   match existing_responses with | Ok true -> Lwt.return
-   (Response.of_plain_text "Contact already exists") | Ok false ->
-   Lwt.bind (insert_contact user contact_id false ()) (fun add -> match
-   add with | Ok _ -> Lwt.return (Response.of_plain_text "Success") |
-   Error e -> Lwt.fail (failwith e)) | Error e3 -> Lwt.fail (failwith
-   e3)) | Error e2 -> Lwt.fail (failwith e2)))) *)
+let add_contact =
+  let open Contacts in
+  let open User in
+  App.post "/addContact" (fun request ->
+      Lwt.bind (Request.to_json_exn request) (fun contact_json ->
+          let both_info = contact_json |> both_of_yojson in
+          Lwt.bind (id_from_email both_info.user_email ())
+            (fun accepted ->
+              match accepted with
+              | Ok user_id ->
+                  Lwt.bind (id_from_email both_info.contact_email ())
+                    (fun contact_response ->
+                      match contact_response with
+                      | Ok contactid ->
+                          Lwt.bind
+                            (does_contact_exist user_id contactid ())
+                            (fun existing_responses ->
+                              match existing_responses with
+                              | Ok true ->
+                                  Lwt.return
+                                    (Response.of_plain_text
+                                       "Contact already exists")
+                              | Ok false ->
+                                  Lwt.bind
+                                    (insert_contact user_id contactid
+                                       false ()) (fun add ->
+                                      match add with
+                                      | Ok _ ->
+                                          Lwt.return
+                                            (Response.of_plain_text
+                                               "Success")
+                                      | Error e -> Lwt.fail (failwith e))
+                              | Error e3 -> Lwt.fail (failwith e3))
+                      | Error e4 -> Lwt.fail (failwith e4))
+              | Error e2 -> Lwt.fail (failwith e2))))
 
 (* get_users creates a get request that outputs users for testing
    purposes *)
@@ -332,7 +447,7 @@ let create_db =
           | Ok () ->
               Lwt.bind (User.username_exists "Bob-bot" ()) (fun d ->
                   match d with
-                  | Ok true ->
+                  | Ok false ->
                       Lwt.bind
                         (User.add_usr "eaxiwojcsblxvyeijz@kvhrr.com"
                            "asldfjaskdl" "Bob-bot" ()) (fun c ->
@@ -348,7 +463,7 @@ let create_db =
                                             (Response.make ~status:`OK
                                                ())))))
                           | Error e -> Lwt.fail (failwith e))
-                  | Ok false ->
+                  | Ok true ->
                       bind_functions (Storage.migrate ())
                         (bind_functions (Contacts.migrate ())
                            (bind_functions
@@ -397,6 +512,5 @@ let _ =
   (*|> App.middleware static_content*)
   |> register_user
   |> login_user |> read_messages |> post_messages |> post_messages_bot
-  (* |> add_contact |> get_contacts |> get_conversations |>
-     make_favorite *)
+  |> add_contact |> get_contacts |> get_conversations |> make_favorite
   |> App.run_command
