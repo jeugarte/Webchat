@@ -8,6 +8,8 @@ lib: [
   "_build/install/default/lib/ocaml_webapp/Storage.mli"
   "_build/install/default/lib/ocaml_webapp/User.ml"
   "_build/install/default/lib/ocaml_webapp/User.mli"
+  "_build/install/default/lib/ocaml_webapp/UserConversation.ml"
+  "_build/install/default/lib/ocaml_webapp/UserConversation.mli"
   "_build/install/default/lib/ocaml_webapp/dune-package"
   "_build/install/default/lib/ocaml_webapp/ocaml_webapp.a"
   "_build/install/default/lib/ocaml_webapp/ocaml_webapp.cma"
@@ -32,6 +34,10 @@ lib: [
   "_build/install/default/lib/ocaml_webapp/ocaml_webapp__User.cmt"
   "_build/install/default/lib/ocaml_webapp/ocaml_webapp__User.cmti"
   "_build/install/default/lib/ocaml_webapp/ocaml_webapp__User.cmx"
+  "_build/install/default/lib/ocaml_webapp/ocaml_webapp__UserConversation.cmi"
+  "_build/install/default/lib/ocaml_webapp/ocaml_webapp__UserConversation.cmt"
+  "_build/install/default/lib/ocaml_webapp/ocaml_webapp__UserConversation.cmti"
+  "_build/install/default/lib/ocaml_webapp/ocaml_webapp__UserConversation.cmx"
   "_build/install/default/lib/ocaml_webapp/opam"
 ]
 libexec: [

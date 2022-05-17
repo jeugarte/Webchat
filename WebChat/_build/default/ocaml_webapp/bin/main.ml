@@ -1,6 +1,5 @@
 open Opium
 open Ocaml_webapp
-open Unix
 
 (* register_user creates a post request that takes in a json containing
    the email, password, username of a new user and outputs "Email taken"
@@ -83,6 +82,77 @@ let login_user =
                   Lwt.return (Response.of_plain_text "No User")
               | Error e -> Lwt.fail (failwith e))))
 
+(* let rec convo_helper lst = let open Conversations in let open
+   UserConversation in match lst with | [] -> Lwt.return [] | h :: t ->
+   Lwt.bind (read_conversation_given_id h.conversation_id ()) (fun
+   response -> match response with | Ok one_convo -> ( match one_convo
+   with | [] -> failwith "DNE" | [ h2 ] -> Lwt.bind (convo_helper t)
+   (fun s -> match s with | d -> Lwt.return (`Assoc [ (
+   "conversation_name", `String h2.conversation_name ); ("creator_name",
+   `String h2.creator_id); ] :: d)) | _ -> failwith "only one element")
+   | Error e -> Lwt.fail (failwith e)) *)
+
+(** [get_conversations] returns the conversations of a specfic user RI:
+    takes in a user id*)
+(* let get_conversations (user : int) = let open UserConversation in
+   App.get "/getConversations" (fun _ -> Lwt.bind
+   (read_conversations_given_user user ()) (fun convoids -> match
+   convoids with | Ok convolst -> Lwt.bind (convo_helper convolst) (fun
+   return -> match return with | json_return -> Lwt.return
+   (Response.of_json (`Assoc [ ("data", `List json_return) ]))) | Error
+   e -> Lwt.fail (failwith e))) *)
+
+(* let rec contacts_helper lst = let open Contacts in let open User in
+   match lst with | [] -> Lwt.return [] | h :: t -> Lwt.bind
+   (read_all_given_id h.contact_id ()) (fun response -> match response
+   with | Ok one_contact -> ( match one_contact with | [] -> failwith
+   "DNE" | [ h2 ] -> Lwt.bind (contacts_helper t) (fun s -> match s with
+   | d -> Lwt.return (`Assoc [ ("email", `String h2.email); ("username",
+   `String h2.username); ] :: d)) | _ -> failwith "only one element") |
+   Error e -> Lwt.fail (failwith e)) *)
+
+(** [get_contacts] returns an association list of a user's contacts with
+    their email and username RI: takes in a user id*)
+(* let get_contacts (user : int) = let open Contacts in App.get
+   "/getContacts" (fun _ -> Lwt.bind (read_contacts_given_userid user
+   ()) (fun response -> match response with | Ok contacts -> Lwt.bind
+   (contacts_helper contacts) (fun return -> match return with |
+   json_return -> Lwt.return (Response.of_json (`Assoc [ ("data", `List
+   json_return) ]))) | Error e -> Lwt.fail (failwith e))) *)
+
+(** [create_conversation] returns success if the conversation with given
+    user ids was created; Failure otherwise. RI: takes in a list of user
+    ids let create_conversation = let open Conversations in App.post
+    "/createConversation" (fun users -> Lwt.bind (Request.to_json_exn
+    users) (fun users_json -> let user_info = users_json |>
+    User.user_of_yojson in ))*)
+
+(** [make_favorite] returns a success text when the contact is now a
+    favorite contact of the user.contact_id Otherwise, it returns
+    "contact does not exist" or an Lwt error RI: user and contact are
+    ids represented as ids*)
+
+(* let make_favorite user contact = let open Contacts in App.post
+   "/makeFavorite" (fun _ -> Lwt.bind (does_contact_exist user contact
+   ()) (fun response -> match response with | Ok true -> Lwt.bind
+   (update_make_favorite user contact ()) (fun update -> match update
+   with | Ok _ -> Lwt.return (Response.of_plain_text "Success") | Error
+   e -> Lwt.fail (failwith e)) | Ok false -> failwith "contact does not
+   exist" | Error e -> Lwt.fail (failwith e))) *)
+
+(* let add_contact user = let open Contacts in let open User in App.post
+   "/addContact" (fun request -> Lwt.bind (Request.to_json_exn request)
+   (fun contact_json -> let contact_info = contact_json |>
+   User.user_of_yojson in Lwt.bind (id_from_email contact_info.email ())
+   (fun accepted -> match accepted with | Ok contact_id -> Lwt.bind
+   (does_contact_exist user contact_id ()) (fun existing_responses ->
+   match existing_responses with | Ok true -> Lwt.return
+   (Response.of_plain_text "Contact already exists") | Ok false ->
+   Lwt.bind (insert_contact user contact_id false ()) (fun add -> match
+   add with | Ok _ -> Lwt.return (Response.of_plain_text "Success") |
+   Error e -> Lwt.fail (failwith e)) | Error e3 -> Lwt.fail (failwith
+   e3)) | Error e2 -> Lwt.fail (failwith e2)))) *)
+
 (* get_users creates a get request that outputs users for testing
    purposes *)
 (* let get_users = App.get "/users" (fun _ -> let users = !users in let
@@ -137,134 +207,12 @@ let read_messages =
                            (`Assoc [ ("data", `List c) ])))
           | Error e -> Lwt.fail (failwith e)))
 
-let rec convo_helper lst =
-  let open Conversations in
-  let open UserConversation in
-  match lst with
-  | [] -> Lwt.return []
-  | h :: t ->
-      Lwt.bind (read_conversation_given_id h.conversation_id ())
-        (fun response ->
-          match response with
-          | Ok one_convo -> (
-              match one_convo with
-              | [] -> failwith "DNE"
-              | [ h2 ] ->
-                  Lwt.bind (convo_helper t) (fun s ->
-                      match s with
-                      | d ->
-                          Lwt.return
-                            (`Assoc
-                               [
-                                 ( "conversation_name",
-                                   `String h2.conversation_name );
-                                 ("creator_name", `String h2.creator_id);
-                               ]
-                            :: d))
-              | _ -> failwith "only one element")
-          | Error e -> Lwt.fail (failwith e))
-
-(** [get_conversations] returns the conversations of a specfic user RI:
-    takes in a user id*)
-let get_conversations (user : int) =
-  let open UserConversation in
-  App.get "/getConversations" (fun _ ->
-      Lwt.bind (read_conversations_given_user user ()) (fun convoids ->
-          match convoids with
-          | Ok convolst ->
-              Lwt.bind (convo_helper convolst) (fun return ->
-                  match return with
-                  | json_return ->
-                      Lwt.return
-                        (Response.of_json
-                           (`Assoc [ ("data", `List json_return) ])))
-          | Error e -> Lwt.fail (failwith e)))
-
-let rec contacts_helper lst =
-  let open Contacts in
-  let open User in
-  match lst with
-  | [] -> Lwt.return []
-  | h :: t ->
-      Lwt.bind (read_all_given_id h.contact_id ()) (fun response ->
-          match response with
-          | Ok one_contact -> (
-              match one_contact with
-              | [] -> failwith "DNE"
-              | [ h2 ] ->
-                  Lwt.bind (contacts_helper t) (fun s ->
-                      match s with
-                      | d ->
-                          Lwt.return
-                            (`Assoc
-                               [
-                                 ("email", `String h2.email);
-                                 ("username", `String h2.username);
-                               ]
-                            :: d))
-              | _ -> failwith "only one element")
-          | Error e -> Lwt.fail (failwith e))
-
-(** [get_contacts] returns an association list of a user's contacts with
-    their email and username RI: takes in a user id*)
-let get_contacts (user : int) =
-  let open Contacts in
-  App.get "/getContacts" (fun _ ->
-      Lwt.bind (read_contacts_given_userid user ()) (fun response ->
-          match response with
-          | Ok contacts ->
-              Lwt.bind (contacts_helper contacts) (fun return ->
-                  match return with
-                  | json_return ->
-                      Lwt.return
-                        (Response.of_json
-                           (`Assoc [ ("data", `List json_return) ])))
-          | Error e -> Lwt.fail (failwith e)))
-
-(** [create_conversation] returns success if the conversation with given
-    user ids was created; Failure otherwise. RI: takes in a list of user
-    ids let create_conversation = let open Conversations in App.post
-    "/createConversation" (fun users -> Lwt.bind (Request.to_json_exn
-    users) (fun users_json -> let user_info = users_json |>
-    User.user_of_yojson in ))*)
-
-(** [make_favorite] returns a success text when the contact is now a favorite contact of the user.contact_id
-    Otherwise, it returns "contact does not exist" or an Lwt error
-    RI: user and contact are ids represented as ids*)
-let make_favorite user contact =
-  let open Contacts in
-  App.post "/makeFavorite" (fun _ ->
-      Lwt.bind (does_contact_exist user contact ()) (fun response ->
-          match response with
-          | Ok true ->
-              Lwt.bind (update_make_favorite user contact ())
-                (fun update ->
-                  match update with
-                  | Ok _ ->
-                      Lwt.return (Response.of_plain_text "Success")
-                  | Error e -> Lwt.fail (failwith e))
-          | Ok false -> failwith "contact does not exist"
-          | Error e -> Lwt.fail (failwith e)))
-
-
-let add_contact user = let open Contacts in let open User in App.post "/addContact" (fun request ->
-  Lwt.bind(Request.to_json_exn request) (fun contact_json ->
-      let contact_info = contact_json |> User.user_of_yojson in Lwt.bind (id_from_email contact_info.email ())(fun accepted -> match accepted with
-        | Ok contact_id -> Lwt.bind(does_contact_exist user contact_id ())(fun existing_responses -> match existing_responses with
-          | Ok true -> Lwt.return (Response.of_plain_text "Contact already exists")
-          | Ok false -> Lwt.bind (insert_contact user contact_id false ())(fun add -> match add with
-            | Ok _ -> Lwt.return (Response.of_plain_text "Success")
-            | Error e -> Lwt.fail (failwith e))
-<<<<<<< HEAD
-          | Error e3 -> Lwt.fail (failwith e3))
-        |Error e2 -> Lwt.fail (failwith e2))))
-
-(** post_messages creates a post request that takes in a json containing
-    the username and message of a message and adds a message with the
-    userid/email and message as fields to messages Raises: "no users" if
-    the username in the json does not match the current username of any
-    user in users "invalid message json" if the input json does not
-    contain username and message *)
+(* post_messages creates a post request that takes in a json containing
+   the username and message of a message and adds a message with the
+   userid/email and message as fields to messages Raises: "no users" if
+   the username in the json does not match the current username of any
+   user in users "invalid message json" if the input json does not
+   contain username and message *)
 let post_messages =
   App.post "/postMessage" (fun request ->
       Lwt.bind (Request.to_json_exn request) (fun input_json ->
@@ -306,14 +254,241 @@ let post_messages =
               | Ok false -> failwith "no users"
               | Error e -> Lwt.fail (failwith e))))
 
+let bot_response s =
+  let rec first_punc l1 =
+    match l1 with
+    | [] -> 1
+    | h :: t -> (
+        match h.[String.length h - 1] with
+        | '.' -> 2
+        | '!' -> 3
+        | '?' -> 4
+        | _ -> first_punc t)
+  in
+  let rec key_word l2 =
+    match l2 with
+    | [] -> 1
+    | h :: t -> (
+        match h with "joke" -> 2 | "you" -> 3 | _ -> key_word t)
+  in
+  let first_word l3 =
+    match List.hd l3 with
+    | "i''m" -> 1
+    | "does" -> 2
+    | "are" -> 2
+    | "is" -> 2
+    | "was" -> 2
+    | "have" -> 2
+    | "do" -> 2
+    | "did" -> 2
+    | "can" -> 2
+    | "should" -> 2
+    | "may" -> 2
+    | "who" -> 3
+    | "what" -> 3
+    | "when" -> 3
+    | "where" -> 3
+    | "why" -> 3
+    | "how" -> 3
+    | "which" -> 3
+    | "what's" -> 3
+    | "how's" -> 3
+    | "when's" -> 3
+    | "who's" -> 3
+    | _ -> 4
+  in
+  let strlist =
+    List.filter
+      (fun a -> a <> "")
+      (String.split_on_char ' '
+         (s |> String.trim |> String.lowercase_ascii))
+  in
+  match (first_punc strlist, key_word strlist, first_word strlist) with
+  | _, _, 1 ->
+      List.fold_left (fun a b -> a ^ " " ^ b) "Hi" (List.tl strlist)
+      ^ ". I'm Bob!"
+  | 4, _, 2 -> (
+      let n = Random.int 3 in
+      match n with 0 -> "Yes" | 1 -> "No" | _ -> "Maybe")
+  | 1, 3, 2 -> (
+      let n = Random.int 3 in
+      match n with 0 -> "Yes" | 1 -> "No" | _ -> "Maybe")
+  | _, _, 3 -> (
+      let n = Random.int 4 in
+      match n with
+      | 0 -> "Huh? Why?"
+      | 1 -> "What?"
+      | 2 -> "Why?"
+      | _ -> "I don't know")
+  | _, 2, _ -> (
+      let n = Random.int 4 in
+      match n with
+      | 0 ->
+          "Once upon a time, there was a farmer who really liked his \
+           tractors. \n\
+          \  He would ride a tractor in his fields for hours at a time \
+           and polish them so \n\
+          \  that they were spick and span. He even had tractor \
+           posters in his room! \n\
+          \  However, the one thing he liked more than his tractors \
+           was his wife. \n\
+          \  Understandably, of course, as he was a family man. \
+           Unfortunately, one day, \n\
+          \  tragedy struck. His wife was killed by a tractor. The \
+           farmer was devastated \n\
+          \  and he could never look at his tractors in the same way \
+           again. He got rid of \n\
+          \  every single one of his tractors and he even ripped up \
+           the tractor posters in \n\
+          \  his room. However, as time past, the pain of his wife''s \
+           passing slowly faded \n\
+          \  away and he found himself in the dating scene again. One \
+           day, he was at a \n\
+          \  restaurant with his date when he heard a loud boom from \
+           the kitchen. Thick black\n\
+          \  plumes of smoke started filling the restaurant and panic \
+           ensued as everyone \n\
+          \  struggled to breath. At this point, the farmer calmly \
+           stood up and said I got this! \n\
+          \  as he opened his mouth and breathed in all of the smoke \
+           in the building. He then\n\
+          \  walked to the door and exhaled all of the smoke. When he \
+           came back to his seat,\n\
+          \  his date was very impressed and she asked him, How did \
+           you manage to do that?\n\
+          \  The farmer responded, Oh, it''s because I''m an \
+           ex-tractor fan."
+      | 1 ->
+          "How do you kiss someone at the end of the world? On the \
+           apocalypse."
+      | 2 ->
+          "Once upon a time, there was a couple -- a man named Pablo \
+           and his wife Michelle. \n\
+          \  One day, one of Pablo''s good friends invited him to a \
+           Halloween costume party. \n\
+          \  Pablo was very excited and agree to go, but he had one \
+           problem ... he didn''t \n\
+          \  have a costume yet. So, as the date of the party drew \
+           closer and closer, Pablo \n\
+          \  visited Party City and many other stores to find the \
+           perfect costume. But, he\n\
+          \  couldn''t find a costume that met his expectations. \
+           Indeed, he wanted a matching\n\
+          \  costume with his wife. Finally, Pablo woke up on the day \
+           of the party realizing\n\
+          \  that he still didn''t have a proper costume. Luckily, \
+           right before the party was \n\
+          \  supposed to start, Pablo came up with a brilliant idea \
+           for a costume. And so, he\n\
+          \  went to the party very proud of himself. When he showed \
+           up to the party, his friend\n\
+          \  looked him up and down and asked, \"Hey Pablo, what''re \
+           you supposed to be?\" \"Oh,\" \n\
+          \  said Pablo \"I''m a turtle.\" \"So what''s your wife \
+           doing on your back?\" asked his \n\
+          \  friend quizzically. To which, Pablo responded, \"Oh, \
+           that''s Michelle.\""
+      | _ ->
+          "What''s the difference between a steak and a meteorite? A \
+           steak is pretty\n\
+          \  meaty but the other is a little meteor.")
+  | 3, _, _ -> (
+      let n = Random.int 4 in
+      match n with
+      | 0 -> "Nice!"
+      | 1 -> "Cool!"
+      | 2 -> "Alrighty."
+      | _ -> "Big!")
+  | 2, _, _ -> (
+      let n = Random.int 4 in
+      match n with
+      | 0 -> "Dang."
+      | 1 -> "Hmm."
+      | 2 -> "*Thinking*"
+      | _ -> "Wow!")
+  | _, _, _ -> "Umm"
+
+let post_messages_bot =
+  App.post "/postMessageBot" (fun request ->
+      Lwt.bind (Request.to_json_exn request) (fun input_json ->
+          let match_user x =
+            match x with
+            | `Assoc [ ("username", `String username); _ ] -> username
+            | _ -> failwith "invalid message json"
+          in
+          Lwt.bind
+            (User.username_exists (match_user input_json) ())
+            (fun q ->
+              match q with
+              | Ok true ->
+                  Lwt.bind
+                    (User.email_of_user (match_user input_json) ())
+                    (fun r ->
+                      match r with
+                      | Ok a ->
+                          Lwt.bind
+                            (Storage.add_msg a "all"
+                               (let match_message y =
+                                  match y with
+                                  | `Assoc
+                                      [
+                                        _; ("message", `String message);
+                                      ] ->
+                                      message
+                                  | _ -> failwith "invalid message json"
+                                in
+                                match_message input_json)
+                               ())
+                            (fun s ->
+                              match s with
+                              | Ok () ->
+                                  Lwt.bind
+                                    (Storage.add_msg
+                                       "eaxiwojcsblxvyeijz@kvhrr.com"
+                                       "all"
+                                       (let match_message z =
+                                          match z with
+                                          | `Assoc
+                                              [
+                                                _;
+                                                ( "message",
+                                                  `String message );
+                                              ] ->
+                                              message
+                                          | _ ->
+                                              failwith
+                                                "invalid message json"
+                                        in
+                                        bot_response
+                                          (match_message input_json))
+                                       ())
+                                    (fun t ->
+                                      match t with
+                                      | Ok () ->
+                                          Lwt.return
+                                            (Response.make ~status:`OK
+                                               ())
+                                      | Error e -> Lwt.fail (failwith e))
+                              | Error e -> Lwt.fail (failwith e))
+                      | Error e -> Lwt.fail (failwith e))
+              | Ok false -> failwith "no users"
+              | Error e -> Lwt.fail (failwith e))))
+
 let create_db =
   App.get "/create" (fun _ ->
       Lwt.bind (User.migrate ()) (fun a ->
           match a with
           | Ok () ->
-              Lwt.bind (Storage.migrate ()) (fun b ->
-                  match b with
-                  | Ok () -> Lwt.return (Response.make ~status:`OK ())
+              Lwt.bind
+                (User.add_usr "eaxiwojcsblxvyeijz@kvhrr.com"
+                   "asldfjaskdl" "Bob-bot" ()) (fun c ->
+                  match c with
+                  | Ok () ->
+                      Lwt.bind (Storage.migrate ()) (fun b ->
+                          match b with
+                          | Ok () ->
+                              Lwt.return (Response.make ~status:`OK ())
+                          | Error e -> Lwt.fail (failwith e))
                   | Error e -> Lwt.fail (failwith e))
           | Error e -> Lwt.fail (failwith e)))
 
@@ -330,187 +505,22 @@ let close_db =
 
 (* cors creates a middleware that fixes cors policy errors that are
    encountered when trying to make requests to the server*)
-let cors = Middleware.allow_cors ~origins:[ "*" ] ~credentials:true ()
+let cors =
+  Middleware.allow_cors
+    ~origins:[ "http://localhost:8080" ]
+    ~credentials:true ()
 
 (* static_content creates a middleware that serves the frontend static
    files so that the app can be accessed from the browser *)
-let static_content =
-  Middleware.static_unix ~local_path:(Unix.realpath "frontend/dist") ()
-=======
-       | Error e -> Lwt.fail (failwith e))
-      | Ok false -> failwith "no users"
-      | Error e -> Lwt.fail (failwith e)
-    )
-    ))
-
-let bot_response s = 
-  let rec first_punc l1 = match l1 with
-  | [] -> 1
-  | h :: t -> (match h.[(String.length h) - 1] with
-    | '.' -> 2
-    | '!' -> 3
-    | '?' -> 4
-    | _ -> first_punc t
-  ) in 
-  let rec key_word l2 = match l2 with
-  | [] -> 1
-  | h :: t -> (match h with 
-    | "joke" -> 2
-    | "you" -> 3
-    | _ -> key_word t)
-  in 
-  let first_word l3 = match List.hd l3 with
-  | "i''m" -> 1
-  | "does" -> 2
-  | "are" -> 2
-  | "is" -> 2
-  | "was" -> 2
-  | "have" -> 2
-  | "do" -> 2
-  | "did" -> 2
-  | "can" -> 2
-  | "should" -> 2
-  | "may" -> 2
-  | "who" -> 3
-  | "what" -> 3
-  | "when" -> 3
-  | "where" -> 3
-  | "why" -> 3
-  | "how" -> 3
-  | "which" -> 3
-  | "what's" -> 3
-  | "how's" -> 3
-  | "when's" -> 3
-  | "who's" -> 3
-  | _ -> 4
-  in
-  let strlist = List.filter (fun a -> a <> "") (String.split_on_char ' ' (s |> String.trim |> String.lowercase_ascii))
-in match (first_punc strlist, key_word strlist, first_word strlist) with
-| (_,_,1) -> (List.fold_left (fun a b -> a ^ " " ^ b) "Hi" (List.tl strlist)) ^ ". I'm Bob!"
-| (4,_,2) -> (let n = Random.int 3 in match n with
-  | 0 -> "Yes"
-  | 1 -> "No"
-  | _ -> "Maybe")
-| (1,3,2) -> (let n = Random.int 3 in match n with
-  | 0 -> "Yes"
-  | 1 -> "No"
-  | _ -> "Maybe")
-| (_,_,3) -> (let n = Random.int 4 in match n with
-  | 0 -> "Huh? Why?"
-  | 1 -> "What?"
-  | 2 -> "Why?"
-  | _ -> "I don't know")
-| (_,2,_) -> (let n = Random.int 4 in match n with
-  | 0 -> "Once upon a time, there was a farmer who really liked his tractors. 
-  He would ride a tractor in his fields for hours at a time and polish them so 
-  that they were spick and span. He even had tractor posters in his room! 
-  However, the one thing he liked more than his tractors was his wife. 
-  Understandably, of course, as he was a family man. Unfortunately, one day, 
-  tragedy struck. His wife was killed by a tractor. The farmer was devastated 
-  and he could never look at his tractors in the same way again. He got rid of 
-  every single one of his tractors and he even ripped up the tractor posters in 
-  his room. However, as time past, the pain of his wife''s passing slowly faded 
-  away and he found himself in the dating scene again. One day, he was at a 
-  restaurant with his date when he heard a loud boom from the kitchen. Thick black
-  plumes of smoke started filling the restaurant and panic ensued as everyone 
-  struggled to breath. At this point, the farmer calmly stood up and said I got this! 
-  as he opened his mouth and breathed in all of the smoke in the building. He then
-  walked to the door and exhaled all of the smoke. When he came back to his seat,
-  his date was very impressed and she asked him, How did you manage to do that?
-  The farmer responded, Oh, it''s because I''m an ex-tractor fan."
-  | 1 -> "How do you kiss someone at the end of the world? On the apocalypse."
-  | 2 -> "Once upon a time, there was a couple -- a man named Pablo and his wife Michelle. 
-  One day, one of Pablo''s good friends invited him to a Halloween costume party. 
-  Pablo was very excited and agree to go, but he had one problem ... he didn''t 
-  have a costume yet. So, as the date of the party drew closer and closer, Pablo 
-  visited Party City and many other stores to find the perfect costume. But, he
-  couldn''t find a costume that met his expectations. Indeed, he wanted a matching
-  costume with his wife. Finally, Pablo woke up on the day of the party realizing
-  that he still didn''t have a proper costume. Luckily, right before the party was 
-  supposed to start, Pablo came up with a brilliant idea for a costume. And so, he
-  went to the party very proud of himself. When he showed up to the party, his friend
-  looked him up and down and asked, \"Hey Pablo, what''re you supposed to be?\" \"Oh,\" 
-  said Pablo \"I''m a turtle.\" \"So what''s your wife doing on your back?\" asked his 
-  friend quizzically. To which, Pablo responded, \"Oh, that''s Michelle.\""
-  | _ -> "What''s the difference between a steak and a meteorite? A steak is pretty
-  meaty but the other is a little meteor.")
-| (3,_,_) -> (let n = Random.int 4 in match n with
-  | 0 -> "Nice!"
-  | 1 -> "Cool!"
-  | 2 -> "Alrighty."
-  | _ -> "Big!")
-| (2,_,_) -> (let n = Random.int 4 in match n with
-| 0 -> "Dang."
-| 1 -> "Hmm."
-| 2 -> "*Thinking*"
-| _ -> "Wow!")
-| (_,_,_) -> "Umm"
-let post_messages_bot = 
-  App.post "/postMessageBot" (fun request -> 
-    Lwt.bind (Request.to_json_exn request) (fun input_json ->
-      let match_user x = match x with 
-        | `Assoc [ ("username", `String username); _ ] -> username
-        | _ -> failwith "invalid message json"
-      in Lwt.bind (User.username_exists (match_user input_json) ()) (fun q -> match q with
-        | Ok true -> Lwt.bind (User.email_of_user (match_user input_json) ()) (fun r -> match r with
-          | Ok a -> (Lwt.bind (Storage.add_msg a "all" 
-          (let match_message y = match y with 
-            | `Assoc [ _ ; ("message", `String message)] 
-            -> message
-            | _ -> failwith "invalid message json" in match_message input_json) () ) (fun s -> match s with
-              | Ok () -> (Lwt.bind (Storage.add_msg "eaxiwojcsblxvyeijz@kvhrr.com" "all"
-                (let match_message z = match z with
-                | `Assoc [ _ ; ("message", `String message)] 
-                -> message
-                | _ -> failwith "invalid message json" in bot_response(match_message input_json)) ()) (fun t -> match t with 
-                | Ok () -> Lwt.return (Response.make ~status: `OK ())
-                | Error e -> Lwt.fail(failwith e)))
-              | Error e -> Lwt.fail (failwith e)))
-         | Error e -> Lwt.fail (failwith e))
-        | Ok false -> failwith "no users"
-        | Error e -> Lwt.fail (failwith e)
-      )
-      ))
-
-let create_db = 
-  App.get "/create" (fun _ -> 
-    Lwt.bind (User.migrate ()) (fun a -> match a with
-    | Ok () -> (Lwt.bind (User.add_usr "eaxiwojcsblxvyeijz@kvhrr.com" "asldfjaskdl" "Bob-bot" ()) (fun c -> match c with 
-    | Ok () -> 
-      (Lwt.bind (Storage.migrate ()) (fun b -> match b with
-      | Ok () -> Lwt.return (Response.make ~status: `OK ())
-      | Error e -> Lwt.fail (failwith e)))
-    | Error e -> Lwt.fail (failwith e)))
-    | Error e -> Lwt.fail (failwith e))
-    )
-
-let close_db = 
-  App.get "/close" (fun _ -> 
-    Lwt.bind (User.rollback ()) (fun a -> match a with
-    | Ok () -> Lwt.bind (Storage.rollback ()) (fun b -> match b with
-      | Ok () -> Lwt.return (Response.make ~status: `OK ())
-      | Error e -> Lwt.fail (failwith e))
-    | Error e -> Lwt.fail (failwith e))
-    )
-
-(* cors creates a middleware that fixes cors policy errors that are encountered when trying to make requests to the server*)
-let cors = Middleware.allow_cors ~origins:["http://localhost:8080"] ~credentials:true ()
-
-(* static_content creates a middleware that serves the frontend static files so that the app can be accessed from the browser *)
-let static_content = Middleware.static_unix ~local_path:(Unix.realpath "frontend/dist") ()
->>>>>>> dc034d5913ab945a8fe8416ba3b2e63b553dfd00
+(* let static_content = Middleware.static_unix
+   ~local_path:(Unix.realpath "frontend/dist") () *)
 
 (* Creates the app with the above functions *)
 let _ =
   App.empty |> App.middleware cors |> create_db |> close_db
-  |> App.middleware static_content
-<<<<<<< HEAD
-  |> register_user |> login_user |> read_messages |> post_messages
-=======
+  (* |> App.middleware static_content *)
   |> register_user
-  |> login_user
-  |> read_messages
-  |> post_messages
-  |> post_messages_bot
->>>>>>> dc034d5913ab945a8fe8416ba3b2e63b553dfd00
+  |> login_user |> read_messages |> post_messages |> post_messages_bot
+  (* |> add_contact |> get_contacts |> get_conversations |>
+     make_favorite *)
   |> App.run_command

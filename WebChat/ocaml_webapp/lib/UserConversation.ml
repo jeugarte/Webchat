@@ -7,12 +7,6 @@ module Db : Caqti_lwt.CONNECTION =
 open Caqti_request.Infix
 open Caqti_type.Std
 
-type user_conversation = {
-  user_conversation_id : int;
-  conversation_id : int;
-  user_id : int;
-}
-
 type users_conversation = {
   conversation_id : int;
   user_id : int;
@@ -33,8 +27,8 @@ module UserConversation = struct
 
   let add_userconvo convoid userid =
     (unit ->. unit)
-    @@ "INSERT INTO userconvolst (convoid, userid) VALUES (convoid, \
-        userid)"
+    @@ "INSERT INTO userconvolst (convoid, userid) VALUES (" ^ convoid
+    ^ ", " ^ userid ^ ")"
 
   let get_convoid_from_userid userid =
     unit
@@ -42,7 +36,8 @@ module UserConversation = struct
           ~encode:(fun s -> Ok s)
           ~decode:(fun s -> Ok s)
           Caqti_type.string
-    @@ "SELECT conversation_id FROM userconvolst WHERE user_id = '" ^ userid ^ "'"
+    @@ "SELECT conversation_id FROM userconvolst WHERE user_id = '"
+    ^ userid ^ "'"
 
   let get_convoid_from_userid2 id =
     unit
@@ -62,7 +57,8 @@ module UserConversation = struct
           ~encode:(fun s -> Ok s)
           ~decode:(fun s -> Ok s)
           Caqti_type.string
-    @@ "SELECT userid FROM userconvolst WHERE conversation_id = '" ^ convo ^ "'"
+    @@ "SELECT userid FROM userconvolst WHERE conversation_id = '"
+    ^ convo ^ "'"
 end
 
 let migrate () =
@@ -82,7 +78,9 @@ let rollback () =
 let insert_user_conversation convo_id user_id () =
   let open UserConversation in
   Lwt.bind
-    (Db.exec (add_userconvo (string_of_int convo_id) (string_of_int user_id)) ())
+    (Db.exec
+       (add_userconvo (string_of_int convo_id) (string_of_int user_id))
+       ())
     (fun result ->
       match result with
       | Ok data -> Lwt.return (Ok data)

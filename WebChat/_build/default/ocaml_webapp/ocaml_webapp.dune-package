@@ -1,4 +1,4 @@
-(lang dune 3.1)
+(lang dune 3.0)
 (name ocaml_webapp)
 (sections (lib .) (libexec .) (bin ../../bin))
 (files
