@@ -15,7 +15,6 @@ const getters = {
 };
 const actions = {
   async create() {
-    await axios.get("close");
     await axios.get("create");
   },
   async registerUser({commit}, form) {

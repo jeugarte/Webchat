@@ -332,7 +332,7 @@ let create_db =
           | Ok () ->
               Lwt.bind (User.username_exists "Bob-bot" ()) (fun d ->
                   match d with
-                  | Ok true ->
+                  | Ok false ->
                       Lwt.bind
                         (User.add_usr "eaxiwojcsblxvyeijz@kvhrr.com"
                            "asldfjaskdl" "Bob-bot" ()) (fun c ->
@@ -348,7 +348,7 @@ let create_db =
                                             (Response.make ~status:`OK
                                                ())))))
                           | Error e -> Lwt.fail (failwith e))
-                  | Ok false ->
+                  | Ok true ->
                       bind_functions (Storage.migrate ())
                         (bind_functions (Contacts.migrate ())
                            (bind_functions
