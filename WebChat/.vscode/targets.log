@@ -1,6 +1,4 @@
 make all --print-data-base --no-builtin-variables --no-builtin-rules --question
-make: *** No rule to make target 'all'.  Stop.
-
 # GNU Make 4.2.1
 # Built for x86_64-pc-linux-gnu
 # Copyright (C) 1988-2016 Free Software Foundation, Inc.
@@ -8,7 +6,7 @@ make: *** No rule to make target 'all'.  Stop.
 # This is free software: you are free to change and redistribute it.
 # There is NO WARRANTY, to the extent permitted by law.
 
-# Make data base, printed on Tue May 17 02:43:49 2022
+# Make data base, printed on Tue May 17 16:25:30 2022
 
 # Variables
 
@@ -17,11 +15,11 @@ make: *** No rule to make target 'all'.  Stop.
 # automatic
 ?F = $(notdir $?)
 # environment
-OPAM_SWITCH_PREFIX = /home/jeu9/.opam/cs3110-2021fa
+OPAM_SWITCH_PREFIX = /home/jeu9/.opam/4.13.1
 # default
 .SHELLFLAGS := -c
 # environment
-OCAML_TOPLEVEL_PATH = /home/jeu9/.opam/cs3110-2021fa/lib/toplevel
+OCAML_TOPLEVEL_PATH = /home/jeu9/.opam/4.13.1/lib/toplevel
 # environment
 VSCODE_LOG_NATIVE = false
 # environment
@@ -57,13 +55,13 @@ VSCODE_CWD = /mnt/c/Users/jeuga/AppData/Local/Programs/Microsoft VS Code
 # default
 MAKE_HOST := x86_64-pc-linux-gnu
 # environment
-PATH = /home/jeu9/.vscode-server/bin/da15b6fd3ef856477bf6f4fb29ba1b7af717770d/bin/remote-cli:/home/jeu9/.opam/cs3110-2021fa/bin:/home/jeu9/.nvm/versions/node/v16.14.0/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/usr/lib/wsl/lib:/mnt/c/Program Files/WindowsApps/CanonicalGroupLimited.UbuntuonWindows_2004.2022.1.0_x64__79rhkp1fndgsc:/mnt/c/Python310/Scripts/:/mnt/c/Python310/:/mnt/c/Program Files (x86)/Razer Chroma SDK/bin:/mnt/c/Program Files/Razer Chroma SDK/bin:/mnt/c/Program Files (x86)/Razer/ChromaBroadcast/bin:/mnt/c/Program Files/Razer/ChromaBroadcast/bin:/mnt/c/Python38/Scripts/:/mnt/c/Python38/:/mnt/c/Program Files (x86)/Intel/Intel(R) Management Engine Components/iCLS/:/mnt/c/Program Files/Intel/Intel(R) Management Engine Components/iCLS/:/mnt/c/WINDOWS/system32:/mnt/c/WINDOWS:/mnt/c/WINDOWS/System32/Wbem:/mnt/c/WINDOWS/System32/WindowsPowerShell/v1.0/:/mnt/c/WINDOWS/System32/OpenSSH/:/mnt/c/Program Files (x86)/Intel/Intel(R) Management Engine Components/DAL:/mnt/c/Program Files/Intel/Intel(R) Management Engine Components/DAL:/mnt/c/ProgramData/chocolatey/bin:/mnt/c/WINDOWS/system32/config/systemprofile/AppData/Local/Microsoft/WindowsApps:/mnt/c/Program Files/Git/cmd:/mnt/c/Program Files/nodejs/:/mnt/c/Users/jeuga/AppData/Local/Microsoft/WindowsApps:/mnt/c/Users/jeuga/AppData/Local/Programs/Microsoft VS Code/bin:/mnt/c/Users/jeuga/AppData/Local/Microsoft/WindowsApps:/mnt/c/sqlite:/mnt/c/Users/jeuga/AppData/Local/Programs/MiKTeX/miktex/bin/x64/:/mnt/c/Users/jeuga/AppData/Roaming/npm:/snap/bin
+PATH = /home/jeu9/.vscode-server/bin/da15b6fd3ef856477bf6f4fb29ba1b7af717770d/bin/remote-cli:/home/jeu9/.opam/4.13.1/bin:/home/jeu9/.nvm/versions/node/v16.14.0/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/usr/lib/wsl/lib:/mnt/c/Program Files/WindowsApps/CanonicalGroupLimited.UbuntuonWindows_2004.2022.1.0_x64__79rhkp1fndgsc:/mnt/c/Python310/Scripts/:/mnt/c/Python310/:/mnt/c/Program Files (x86)/Razer Chroma SDK/bin:/mnt/c/Program Files/Razer Chroma SDK/bin:/mnt/c/Program Files (x86)/Razer/ChromaBroadcast/bin:/mnt/c/Program Files/Razer/ChromaBroadcast/bin:/mnt/c/Python38/Scripts/:/mnt/c/Python38/:/mnt/c/Program Files (x86)/Intel/Intel(R) Management Engine Components/iCLS/:/mnt/c/Program Files/Intel/Intel(R) Management Engine Components/iCLS/:/mnt/c/WINDOWS/system32:/mnt/c/WINDOWS:/mnt/c/WINDOWS/System32/Wbem:/mnt/c/WINDOWS/System32/WindowsPowerShell/v1.0/:/mnt/c/WINDOWS/System32/OpenSSH/:/mnt/c/Program Files (x86)/Intel/Intel(R) Management Engine Components/DAL:/mnt/c/Program Files/Intel/Intel(R) Management Engine Components/DAL:/mnt/c/ProgramData/chocolatey/bin:/mnt/c/WINDOWS/system32/config/systemprofile/AppData/Local/Microsoft/WindowsApps:/mnt/c/Program Files/Git/cmd:/mnt/c/Program Files/nodejs/:/mnt/c/Users/jeuga/AppData/Local/Microsoft/WindowsApps:/mnt/c/Users/jeuga/AppData/Local/Programs/Microsoft VS Code/bin:/mnt/c/Users/jeuga/AppData/Local/Microsoft/WindowsApps:/mnt/c/sqlite:/mnt/c/Users/jeuga/AppData/Local/Programs/MiKTeX/miktex/bin/x64/:/mnt/c/Users/jeuga/AppData/Roaming/npm:/snap/bin
 # environment
 NVM_BIN = /home/jeu9/.nvm/versions/node/v16.14.0/bin
 # environment
 VSCODE_LOG_STACK = false
 # environment
-VSCODE_IPC_HOOK_CLI = /tmp/vscode-ipc-47809f4d-443d-4585-8c80-2b3514bbf931.sock
+VSCODE_IPC_HOOK_CLI = /tmp/vscode-ipc-f9e3e3d0-8e3f-4528-aacc-a50f7413eb12.sock
 # default
 .FEATURES := target-specific order-only second-expansion else-if shortest-stem undefine oneshell archives jobserver output-sync check-symlink load
 # environment
@@ -77,11 +75,11 @@ PWD = /home/jeu9/cs3110/WebChat/webchat/WebChat
 # default
 .LOADED := 
 # environment
-WSL_INTEROP = /run/WSL/10623_interop
+WSL_INTEROP = /run/WSL/20010_interop
 # environment
-PKG_CONFIG_PATH = /home/jeu9/.opam/cs3110-2021fa/lib/pkgconfig:
+PKG_CONFIG_PATH = /home/jeu9/.opam/4.13.1/lib/pkgconfig:
 # environment
-MANPATH = :/home/jeu9/.opam/cs3110-2021fa/man
+MANPATH = :/home/jeu9/.opam/4.13.1/man
 # environment
 VSCODE_AMD_ENTRYPOINT = vs/workbench/api/node/extensionHostProcess
 # environment
@@ -113,7 +111,7 @@ MAKE_VERSION := 4.2.1
 # environment
 USER = jeu9
 # environment
-CAML_LD_LIBRARY_PATH = /home/jeu9/.opam/cs3110-2021fa/lib/stublibs:/home/jeu9/.opam/cs3110-2021fa/lib/ocaml/stublibs:/home/jeu9/.opam/cs3110-2021fa/lib/ocaml
+CAML_LD_LIBRARY_PATH = /home/jeu9/.opam/4.13.1/lib/stublibs:/home/jeu9/.opam/4.13.1/lib/ocaml/stublibs:/home/jeu9/.opam/4.13.1/lib/ocaml
 # makefile
 .DEFAULT_GOAL := build
 # environment
@@ -123,7 +121,7 @@ WSLENV = ELECTRON_RUN_AS_NODE/w:
 # automatic
 %D = $(patsubst %/,%,$(dir $%))
 # environment
-VSCODE_WSL_EXT_LOCATION = /mnt/c/Users/jeuga/.vscode/extensions/ms-vscode-remote.remote-wsl-0.66.2
+VSCODE_WSL_EXT_LOCATION = /mnt/c/Users/jeuga/.vscode/extensions/ms-vscode-remote.remote-wsl-0.66.3
 # default
 MAKE_COMMAND := make
 # default
@@ -168,10 +166,8 @@ TERM = xterm-256color
 VSCODE_EXTHOST_WILL_SEND_SOCKET = true
 # environment
 WSL_DISTRO_NAME = Ubuntu
-# environment
-MOTD_SHOWN = update-motd
 # variable set hash-table stats:
-# Load=79/1024=8%, Rehash=0, Collisions=5/104=5%
+# Load=78/1024=8%, Rehash=0, Collisions=5/103=5%
 
 # Pattern-specific Variable Values
 
@@ -275,6 +271,8 @@ serve:
 # strcache performance: lookups = 46 / hit rate = 28%
 # hash-table stats:
 # Load=33/8192=0%, Rehash=0, Collisions=1/46=2%
-# Finished Make data base on Tue May 17 02:43:49 2022
+# Finished Make data base on Tue May 17 16:25:30 2022
 
  
+make: *** No rule to make target 'all'.  Stop.
+

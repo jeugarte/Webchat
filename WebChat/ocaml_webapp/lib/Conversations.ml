@@ -28,8 +28,8 @@ module Conversations = struct
 
   let add_convo cname creator =
     (unit ->. unit)
-    @@ "INSERT INTO convolst (convo_name, creator) VALUES ('" ^ cname
-    ^ "', '" ^ creator ^ "')"
+    @@ "INSERT INTO convolst (convo_name, creator_name) VALUES ('"
+    ^ cname ^ "', '" ^ creator ^ "')"
 
   let get_convo_name gc_id =
     unit
@@ -37,7 +37,7 @@ module Conversations = struct
           ~encode:(fun s -> Ok s)
           ~decode:(fun s -> Ok s)
           Caqti_type.string
-    @@ "SELECT convo_name FROM convolst WHERE id = " ^ gc_id
+    @@ "SELECT convo_name FROM convolst WHERE id = '" ^ gc_id ^ "'"
 
   let get_creator gc_id =
     unit
@@ -45,7 +45,7 @@ module Conversations = struct
           ~encode:(fun s -> Ok s)
           ~decode:(fun s -> Ok s)
           Caqti_type.string
-    @@ "SELECT creator FROM convolst WHERE id = " ^ gc_id
+    @@ "SELECT creator_name FROM convolst WHERE id = '" ^ gc_id ^ "'"
 
   let get_conversation_from_id uuid =
     unit
@@ -59,15 +59,15 @@ module Conversations = struct
             Ok { conversation_id; conversation_name; creator_id })
           Caqti_type.(tup3 int string string)
     @@ "SELECT id, convo_name, creator_name FROM convolst WHERE id = "
-    ^ uuid
+    ^ uuid ^ "'"
 
-  let get_id_from_convo_name convo_name =
+  let get_id_from_convo_name =
     unit
     ->! Caqti_type.custom
           ~encode:(fun s -> Ok s)
           ~decode:(fun s -> Ok s)
           Caqti_type.int
-    @@ "select id from usrlst where convo_name = '" ^ convo_name ^ "'"
+    @@ "SELECT id FROM convolst ORDER BY id DESC LIMIT 1"
 end
 
 let migrate () =
@@ -91,9 +91,7 @@ let insert_convo cname creator () =
     (fun result ->
       match result with
       | Ok () ->
-          Lwt.bind
-            (Db.find (get_id_from_convo_name cname) ())
-            (fun response ->
+          Lwt.bind (Db.find get_id_from_convo_name ()) (fun response ->
               match response with
               | Ok id -> Lwt.return (Ok id)
               | Error error ->
