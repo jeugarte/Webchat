@@ -1,13 +1,19 @@
-(lang dune 3.0)
+(lang dune 3.1)
 (name ocaml_webapp)
 (sections (lib .) (libexec .) (bin ../../bin))
 (files
  (lib
-  (META
+  (Contacts.ml
+   Contacts.mli
+   Conversations.ml
+   Conversations.mli
+   META
    Storage.ml
    Storage.mli
    User.ml
    User.mli
+   UserConversation.ml
+   UserConversation.mli
    dune-package
    ocaml_webapp.a
    ocaml_webapp.cma
@@ -16,6 +22,14 @@
    ocaml_webapp.cmx
    ocaml_webapp.cmxa
    ocaml_webapp.ml
+   ocaml_webapp__Contacts.cmi
+   ocaml_webapp__Contacts.cmt
+   ocaml_webapp__Contacts.cmti
+   ocaml_webapp__Contacts.cmx
+   ocaml_webapp__Conversations.cmi
+   ocaml_webapp__Conversations.cmt
+   ocaml_webapp__Conversations.cmti
+   ocaml_webapp__Conversations.cmx
    ocaml_webapp__Storage.cmi
    ocaml_webapp__Storage.cmt
    ocaml_webapp__Storage.cmti
@@ -24,6 +38,10 @@
    ocaml_webapp__User.cmt
    ocaml_webapp__User.cmti
    ocaml_webapp__User.cmx
+   ocaml_webapp__UserConversation.cmi
+   ocaml_webapp__UserConversation.cmt
+   ocaml_webapp__UserConversation.cmti
+   ocaml_webapp__UserConversation.cmx
    opam))
  (libexec (ocaml_webapp.cmxs))
  (bin (ocaml_webapp)))
@@ -40,6 +58,16 @@
   (wrapped
    (main_module_name Ocaml_webapp)
    (modules
+    ((name Contacts)
+     (obj_name ocaml_webapp__Contacts)
+     (visibility public)
+     (impl)
+     (intf))
+    ((name Conversations)
+     (obj_name ocaml_webapp__Conversations)
+     (visibility public)
+     (impl)
+     (intf))
     ((name Storage)
      (obj_name ocaml_webapp__Storage)
      (visibility public)
@@ -47,6 +75,11 @@
      (intf))
     ((name User)
      (obj_name ocaml_webapp__User)
+     (visibility public)
+     (impl)
+     (intf))
+    ((name UserConversation)
+     (obj_name ocaml_webapp__UserConversation)
      (visibility public)
      (impl)
      (intf)))
