@@ -17,7 +17,7 @@ const routes = [
     meta: {requiresAuth: true}
   },
   {
-    path: '/conversations/:convoID',
+    path: '/chat',
     name: 'Chat',
     component: () => import(/* webpackChunkName: "about" */ '../views/Chat.vue'),
     meta: {requiresAuth: true}

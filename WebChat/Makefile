@@ -20,5 +20,7 @@ serve:
 	npm run --prefix frontend serve
 
 test:
-	dune build
 	OCAMLRUNPARAM=b dune exec ocaml_webapp/test/main.exe
+
+docs: 
+	dune build @doc

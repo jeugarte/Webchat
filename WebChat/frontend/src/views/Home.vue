@@ -84,7 +84,7 @@
               <span class = "contact-username">{{ contact.username }}</span>
             </div>
             <div class = "convo-info">
-              <span class = "convo-num">{{ contact.num }} Conversations</span>
+              <span class = "convo-num">{{ conversations.filter(function(convo) {return convo.users.includes(contact.email)}).length }} Conversations</span>
               <span v-on:click = "startConvoPopup = true; newConvo.members = [contact.email]" class = "start-convo" title = "Start conversation with contact"><i class = "fa fa-plus"></i></span>
             </div>
             <div class = "fav-info">
@@ -122,7 +122,8 @@ export default {
   computed: {
     ...mapGetters({
       user: 'User',
-      contacts: 'Contacts'
+      contacts: 'Contacts',
+      conversations: 'Conversations'
     })
   },
   methods: {
@@ -186,6 +187,7 @@ export default {
   },
   mounted() {
     this.$store.dispatch('GetContacts');
+    this.$store.dispatch('GetConversations');
   },
   created() {
     this.username = this.user.username;

@@ -55,6 +55,9 @@ export default {
         try {
           await this.$store.dispatch("RegisterUser", this.form);
           await this.$store.dispatch("AddContact", "bob");
+          await this.$store.dispatch("AddContact", "joe");
+          await this.$store.dispatch('GetContacts');
+          await this.$store.dispatch('GetConversations');
           await this.$router.push("/");
         } catch (error) {
           window.alert(error);

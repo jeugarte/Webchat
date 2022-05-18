@@ -57,7 +57,7 @@
  (archives (byte ocaml_webapp.cma) (native ocaml_webapp.cmxa))
  (plugins (byte ocaml_webapp.cma) (native ocaml_webapp.cmxs))
  (native_archives ocaml_webapp.a)
- (requires opium caqti caqti-lwt caqti-driver-postgresql)
+ (requires opium caqti caqti-lwt caqti-driver-postgresql yojson stdlib lwt)
  (main_module_name Ocaml_webapp)
  (modes byte native)
  (modules

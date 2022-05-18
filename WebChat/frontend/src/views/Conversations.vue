@@ -37,7 +37,7 @@
       </div>
 
       <div id = "conversations">
-        <div v-for = "convo in conversations" v-bind:key = "convo.name" class = "convo" v-on:click = "navigate('conversations/' + convo.id)">
+        <div v-for = "convo in conversations" v-bind:key = "convo.name" class = "convo" v-on:click = "convoClick(convo.id)">
           <div class = "convo-info">
             <span class = "convo-name">{{ convo.name }}</span>
             <span class = "contact-creator">Creator: {{ convo.creator }}</span>
@@ -77,9 +77,9 @@ export default {
     })
   },
   methods: {
-    // navigate (place => router-view location to route to when called), push new location to router stack
-    navigate: function(place) {
-      this.$router.push("/" + place);
+    convoClick: function(convoID) {
+      this.$store.commit('setCurrentConvo', convoID);
+      this.$router.push("/chat");
     },
 
 

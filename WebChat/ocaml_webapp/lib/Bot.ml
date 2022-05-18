@@ -76,7 +76,7 @@ let bob_bot_response s rand_var =
           (fun a b -> a ^ " " ^ b)
           "Hi"
           (rec_strlist (strlist s))
-        ^ ". I'm Bob!" )
+        ^ ". Im Bob!" )
   | 4, _, 2 -> (
       match rand_of_var rand_var with
       | 0 -> (true, "Yes")
@@ -94,7 +94,7 @@ let bob_bot_response s rand_var =
       | 0 -> (true, "Huh? Why?")
       | 1 -> (true, "What?")
       | 2 -> (true, "Why?")
-      | _ -> (true, "I don't know"))
+      | _ -> (true, "I dont know"))
   | _, 2, _ -> (
       match rand_of_var rand_var with
       | 0 ->
@@ -244,7 +244,7 @@ let joe_bot_response s _ =
             (fun a b -> a ^ " " ^ b)
             "Hi"
             (rec_strlist (strlist s))
-          ^ ". I'm Joe!" )
-    | 3 -> (true, "Hi, it's Joe!")
-    | 4 -> (true, "Don't be sad ... Joe is here!")
+          ^ ". Im Joe!" )
+    | 3 -> (true, "Hi, its Joe!")
+    | 4 -> (true, "Dont be sad ... Joe is here!")
     | _ -> (false, "")

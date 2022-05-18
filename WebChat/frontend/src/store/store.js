@@ -10,7 +10,8 @@ const state = {
     username: null
   },
   contacts: [],
-  conversations: []
+  conversations: [],
+  currentConvo: 0,
 };
 const getters = {
   Confirmations: state => state.confirmations,
@@ -19,7 +20,8 @@ const getters = {
   WindowWidth: state => state.windowWidth,
   User: state => state.user,
   Contacts: state => state.contacts,
-  Conversations: state => state.conversations
+  Conversations: state => state.conversations,
+  CurrentConvo: state => state.currentConvo
 };
 const actions = {
   async Confirmation({commit}, message) {
@@ -58,8 +60,8 @@ const actions = {
     });
   },
   async SetUserName({commit, getters}, name) {
-    // set user name endpoint
-    commit('setUserName', {email: state.user.email, username: name});
+    await axios.post("changeUsername", {email: state.user.email, username: name});
+    commit('setUser', {email: state.user.email, username: name});
   },
   async GetContacts({commit}) {
     await axios.post("getContacts", {email: state.user.email}).then(function(response) {
@@ -162,6 +164,9 @@ const mutations = {
   },
   setConversations(state, conversations) {
     state.conversations = conversations;
+  },
+  setCurrentConvo(state, currentConvo) {
+    state.currentConvo = currentConvo;
   }
 };
 export default {

@@ -38,27 +38,37 @@ export default {
     return {
       newMessage: "",
       pastMessages: [],
-      name: "hello",
-      convoID: null
+      name: "hello"
     }
   },
   computed: {
     ...mapGetters({
-      user: 'User'
+      user: 'User',
+      contacts: 'Contacts',
+      conversations: 'Conversations',
+      convoID: 'CurrentConvo'
     })
   },
   methods: {
     postMessage: async function () {
+      let self = this;
+
       if (this.newMessage !== "") {
-        await axios.post("postMessageBot", { username: this.user.username, message: this.newMessage });
+        await axios.post("postMessage", {
+          sender_email: this.user.email,
+          conversation_id: this.convoID,
+          message: this.newMessage,
+          bob: this.conversations.filter(function(convo) {return convo.id === self.convoID})[0].users.includes("bob"),
+          joe: this.conversations.filter(function(convo) {return convo.id === self.convoID})[0].users.includes("joe")
+        });
         this.newMessage = "";
         await this.getMessages();
       }
     },
-    getMessages: async function () {
+    getMessages: function () {
       let self = this;
       let oldMessagesLength = this.pastMessages.length;
-      await axios.get("getMessages").then(function (response) {
+      axios.post("getMessages", {id: this.convoID}).then(function (response) {
         self.pastMessages = response.data.data.reverse();
         if (self.pastMessages.length > oldMessagesLength) {
           window.setTimeout(function () {
@@ -69,15 +79,11 @@ export default {
     }
   },
   mounted() {
-    let self = this;
-
-    this.convoID = this.$route.params.convoID;
 
     this.getMessages();
     window.setTimeout(function () {
       this.$refs.viewBox.scrollTop = this.$refs.viewBox.scrollHeight;
     }, 0);
-    console.log(this.user);
     window.setInterval(this.getMessages, 100);
   }
 }
