@@ -82,40 +82,20 @@ let login_user =
                   Lwt.return (Response.of_plain_text "No User")
               | Error e -> Lwt.fail (failwith e))))
 
-let rec ids_to_usernames lst =
-  let open User in
-  match lst with
-  | [] -> Lwt.return []
-  | h :: t ->
-      Lwt.bind (read_all_given_id h ()) (fun response ->
-          match response with
-          | Ok one_contact -> (
-              match one_contact with
-              | [] -> failwith "DNE"
-              | [ h2 ] ->
-                  Lwt.bind (ids_to_usernames t) (fun s ->
-                      match s with
-                      | d ->
-                          Lwt.return
-                            (`Assoc
-                               [ ("username", `String h2.username) ]
-                            :: d))
-              | _ -> failwith "only one element")
-          | Error e -> Lwt.fail (failwith e))
+(* let rec ids_to_usernames lst = let open User in match lst with | []
+   -> Lwt.return [] | h :: t -> Lwt.bind (read_all_given_id h ()) (fun
+   response -> match response with | Ok one_contact -> ( match
+   one_contact with | [] -> failwith "DNE" | [ h2 ] -> Lwt.bind
+   (ids_to_usernames t) (fun s -> Lwt.return (h2.email :: s)) | _ ->
+   failwith "only one element") | Error e -> Lwt.fail (failwith e)) *)
 
-let users_from_convo convoid =
-  let open UserConversation in
-  Lwt.bind (get_userid_from_conversationid convoid ())
-    (fun list_response ->
-      match list_response with
-      | Ok user_list ->
-          Lwt.bind (ids_to_usernames user_list) (fun response ->
-              match response with
-              | Ok accepted -> accepted
-              | Error e -> Lwt.fail (failwith e))
-      | Error e -> Lwt.fail (failwith e))
-
-let rec wrap_userlist (u : string list) : Yojson.Safe.t list =
+(* let users_from_convo convoid = let open UserConversation in Lwt.bind
+   (get_userid_from_conversationid convoid ()) (fun list_response ->
+   match list_response with | Ok user_list -> Lwt.bind (ids_to_usernames
+   user_list) (fun response -> match response with | Ok accepted ->
+   accepted | Error e -> Lwt.fail (failwith e)) | Error e -> Lwt.fail
+   (failwith e)) *)
+let rec wrap_userlist (u : string list) =
   match u with [] -> [] | h :: t -> `String h :: wrap_userlist t
 
 let rec convo_helper lst =
@@ -124,29 +104,36 @@ let rec convo_helper lst =
   match lst with
   | [] -> Lwt.return []
   | h :: t ->
-      let username_list = users_from_convo h.conversation_id in
-      Lwt.bind (read_conversation_given_id h.conversation_id ())
-        (fun response ->
-          match response with
-          | Ok one_convo -> (
-              match one_convo with
-              | [] -> failwith "DNE"
-              | [ h2 ] ->
-                  Lwt.bind (convo_helper t) (fun s ->
-                      match s with
-                      | d ->
-                          Lwt.return
-                            (`Assoc
-                               [
-                                 ( "conversation_name",
-                                   `String h2.conversation_name );
-                                 ("creator_name", `String h2.creator_id);
-                                 ( "users",
-                                   `List (username_list |> wrap_userlist)
-                                 );
-                               ]
-                            :: d))
-              | _ -> failwith "only one element")
+      Lwt.bind (get_users_from_conversationid h.conversation_id ())
+        (fun l1 ->
+          match l1 with
+          | Ok uidlist ->
+              (* Lwt.bind (ids_to_usernames uidlist) (fun temp -> match
+                 temp with | useremaillist -> *)
+              Lwt.bind (read_conversation_given_id h.conversation_id ())
+                (fun response ->
+                  match response with
+                  | Ok one_convo -> (
+                      match one_convo with
+                      | [] -> failwith "DNE"
+                      | [ h2 ] ->
+                          Lwt.bind (convo_helper t) (fun s ->
+                              Lwt.return
+                                (`Assoc
+                                   [
+                                     ( "conversation_name",
+                                       `String h2.conversation_name );
+                                     ( "conversation_id",
+                                       `Int h.conversation_id );
+                                     ( "creator_email",
+                                       `String h2.creator_id );
+                                     ( "users",
+                                       `List (uidlist |> wrap_userlist)
+                                     );
+                                   ]
+                                :: s))
+                      | _ -> failwith "only one element")
+                  | Error e -> Lwt.fail (failwith e))
           | Error e -> Lwt.fail (failwith e))
 
 let rec gen_user_convos convoid userlist creatorid =

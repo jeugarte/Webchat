@@ -12,6 +12,11 @@ type users_conversation = {
   user_id : int;
 }
 
+type get_user = {
+  email : string;
+  username : string;
+}
+
 type conversation_id = { id : int }
 
 let convo_of_yojson yojson =
@@ -58,14 +63,14 @@ module UserConversation = struct
     @@ "SELECT conversation_id, users_id FROM userconvolst WHERE \
         users_id = '" ^ id ^ "'"
 
-  let get_userid_from_convo convo =
+  let get_users_from_convo convo =
     unit
-    ->! Caqti_type.custom
+    ->* Caqti_type.custom
           ~encode:(fun s -> Ok s)
           ~decode:(fun s -> Ok s)
-          Caqti_type.int
-    @@ "SELECT users_id FROM userconvolst WHERE conversation_id = '"
-    ^ convo ^ "'"
+          Caqti_type.string
+    @@ "SELECT email FROM usrlst WHERE id IN (SELECT users_id FROM \
+        userconvolst WHERE conversation_id = '" ^ convo ^ "')"
 end
 
 let migrate () =
@@ -115,12 +120,12 @@ let read_conversations_given_user id () =
       | Ok data -> Lwt.return (Ok data)
       | Error error -> failwith (Caqti_error.show error))
 
-let get_userid_from_conversationid id () =
+let get_users_from_conversationid id () =
   let open UserConversation in
   Lwt.bind
     (Db.fold
-       (get_userid_from_convo (string_of_int id))
-       (fun temp_id acc -> temp_id :: acc)
+       (get_users_from_convo (string_of_int id))
+       (fun s acc -> s :: acc)
        () [])
     (fun result ->
       match result with

@@ -82,40 +82,20 @@ let login_user =
                   Lwt.return (Response.of_plain_text "No User")
               | Error e -> Lwt.fail (failwith e))))
 
-let rec ids_to_usernames lst =
-  let open User in
-  match lst with
-  | [] -> Lwt.return []
-  | h :: t ->
-      Lwt.bind (read_all_given_id h ()) (fun response ->
-          match response with
-          | Ok one_contact -> (
-              match one_contact with
-              | [] -> failwith "DNE"
-              | [ h2 ] ->
-                  Lwt.bind (ids_to_usernames t) (fun s ->
-                      match s with
-                      | d ->
-                          Lwt.return
-                            (`Assoc
-                               [ ("username", `String h2.username) ]
-                            :: d))
-              | _ -> failwith "only one element")
-          | Error e -> Lwt.fail (failwith e))
+(* let rec ids_to_usernames lst = let open User in match lst with | []
+   -> Lwt.return [] | h :: t -> Lwt.bind (read_all_given_id h ()) (fun
+   response -> match response with | Ok one_contact -> ( match
+   one_contact with | [] -> failwith "DNE" | [ h2 ] -> Lwt.bind
+   (ids_to_usernames t) (fun s -> Lwt.return (h2.email :: s)) | _ ->
+   failwith "only one element") | Error e -> Lwt.fail (failwith e)) *)
 
-let users_from_convo convoid =
-  let open UserConversation in
-  Lwt.bind (get_userid_from_conversationid convoid ())
-    (fun list_response ->
-      match list_response with
-      | Ok user_list ->
-          Lwt.bind (ids_to_usernames user_list) (fun response ->
-              match response with
-              | Ok accepted -> accepted
-              | Error e -> Lwt.fail (failwith e))
-      | Error e -> Lwt.fail (failwith e))
-
-let rec wrap_userlist (u : string list) : Yojson.Safe.t list =
+(* let users_from_convo convoid = let open UserConversation in Lwt.bind
+   (get_userid_from_conversationid convoid ()) (fun list_response ->
+   match list_response with | Ok user_list -> Lwt.bind (ids_to_usernames
+   user_list) (fun response -> match response with | Ok accepted ->
+   accepted | Error e -> Lwt.fail (failwith e)) | Error e -> Lwt.fail
+   (failwith e)) *)
+let rec wrap_userlist (u : string list) =
   match u with [] -> [] | h :: t -> `String h :: wrap_userlist t
 
 let rec convo_helper lst =
@@ -124,29 +104,36 @@ let rec convo_helper lst =
   match lst with
   | [] -> Lwt.return []
   | h :: t ->
-      let username_list = users_from_convo h.conversation_id in
-      Lwt.bind (read_conversation_given_id h.conversation_id ())
-        (fun response ->
-          match response with
-          | Ok one_convo -> (
-              match one_convo with
-              | [] -> failwith "DNE"
-              | [ h2 ] ->
-                  Lwt.bind (convo_helper t) (fun s ->
-                      match s with
-                      | d ->
-                          Lwt.return
-                            (`Assoc
-                               [
-                                 ( "conversation_name",
-                                   `String h2.conversation_name );
-                                 ("creator_name", `String h2.creator_id);
-                                 ( "users",
-                                   `List (username_list |> wrap_userlist)
-                                 );
-                               ]
-                            :: d))
-              | _ -> failwith "only one element")
+      Lwt.bind (get_users_from_conversationid h.conversation_id ())
+        (fun l1 ->
+          match l1 with
+          | Ok uidlist ->
+              (* Lwt.bind (ids_to_usernames uidlist) (fun temp -> match
+                 temp with | useremaillist -> *)
+              Lwt.bind (read_conversation_given_id h.conversation_id ())
+                (fun response ->
+                  match response with
+                  | Ok one_convo -> (
+                      match one_convo with
+                      | [] -> failwith "DNE"
+                      | [ h2 ] ->
+                          Lwt.bind (convo_helper t) (fun s ->
+                              Lwt.return
+                                (`Assoc
+                                   [
+                                     ( "conversation_name",
+                                       `String h2.conversation_name );
+                                     ( "conversation_id",
+                                       `Int h.conversation_id );
+                                     ( "creator_email",
+                                       `String h2.creator_id );
+                                     ( "users",
+                                       `List (uidlist |> wrap_userlist)
+                                     );
+                                   ]
+                                :: s))
+                      | _ -> failwith "only one element")
+                  | Error e -> Lwt.fail (failwith e))
           | Error e -> Lwt.fail (failwith e))
 
 let rec gen_user_convos convoid userlist creatorid =
@@ -516,7 +503,6 @@ let post_message =
                       | Error e -> Lwt.fail (failwith e))
               | Error e -> Lwt.fail (failwith e))))
 
-<<<<<<< HEAD
 (* let post_messages = App.post "/postMessage" (fun request -> Lwt.bind
    (Request.to_json_exn request) (fun input_json -> let match_user x =
    match x with | `Assoc [ ("username", `String username); _ ] ->
@@ -551,75 +537,26 @@ let post_message =
    Error e -> Lwt.fail (failwith e)) | Error e -> Lwt.fail (failwith e))
    | Ok false -> failwith "no users" | Error e -> Lwt.fail (failwith
    e)))) *)
-=======
-let post_messages_bot =
-  App.post "/postMessageBot" (fun request ->
-      Lwt.bind (Request.to_json_exn request) (fun input_json ->
-          let match_user x =
-            match x with
-            | `Assoc [ ("username", `String username); _ ] -> username
-            | _ -> failwith "invalid message json"
-          in
-          Lwt.bind
-            (User.username_exists (match_user input_json) ())
-            (fun q ->
-              match q with
-              | Ok true ->
-                  Lwt.bind
-                    (User.email_of_user (match_user input_json) ())
-                    (fun r ->
-                      match r with
-                      | Ok a ->
-                          Lwt.bind
-                            (Storage.add_msg a "all"
-                               (let match_message y =
-                                  match y with
-                                  | `Assoc
-                                      [
-                                        _; ("message", `String message);
-                                      ] ->
-                                      message
-                                  | _ -> failwith "invalid message json"
-                                in
-                                match_message input_json)
-                               ())
-                            (fun s ->
-                              match s with
-                              | Ok () ->
-                                  Lwt.bind
-                                    (Storage.add_msg
-                                       "eaxiwojcsblxvyeijz@kvhrr.com"
-                                       "all"
-                                       (let match_message z =
-                                          match z with
-                                          | `Assoc
-                                              [
-                                                _;
-                                                ( "message",
-                                                  `String message );
-                                              ] ->
-                                              message
-                                          | _ ->
-                                              failwith
-                                                "invalid message json"
-                                        in
-                                        snd
-                                          (Bot.bob_bot_response
-                                             (match_message input_json)
-                                             4))
-                                       ())
-                                    (fun t ->
-                                      match t with
-                                      | Ok () ->
-                                          Lwt.return
-                                            (Response.make ~status:`OK
-                                               ())
-                                      | Error e -> Lwt.fail (failwith e))
-                              | Error e -> Lwt.fail (failwith e))
-                      | Error e -> Lwt.fail (failwith e))
-              | Ok false -> failwith "no users"
-              | Error e -> Lwt.fail (failwith e))))
->>>>>>> 4094db49b7e9d85be59ce35078fa04d0932f28aa
+
+(* let post_messages_bot = App.post "/postMessageBot" (fun request ->
+   Lwt.bind (Request.to_json_exn request) (fun input_json -> let
+   match_user x = match x with | `Assoc [ ("username", `String
+   username); _ ] -> username | _ -> failwith "invalid message json" in
+   Lwt.bind (User.username_exists (match_user input_json) ()) (fun q ->
+   match q with | Ok true -> Lwt.bind (User.email_of_user (match_user
+   input_json) ()) (fun r -> match r with | Ok a -> Lwt.bind
+   (Storage.add_msg a "all" (let match_message y = match y with | `Assoc
+   [ _; ("message", `String message); ] -> message | _ -> failwith
+   "invalid message json" in match_message input_json) ()) (fun s ->
+   match s with | Ok () -> Lwt.bind (Storage.add_msg
+   "eaxiwojcsblxvyeijz@kvhrr.com" "all" (let match_message z = match z
+   with | `Assoc [ _; ( "message", `String message ); ] -> message | _
+   -> failwith "invalid message json" in snd (Bot.bob_bot_response
+   (match_message input_json) 4)) ()) (fun t -> match t with | Ok () ->
+   Lwt.return (Response.make ~status:`OK ()) | Error e -> Lwt.fail
+   (failwith e)) | Error e -> Lwt.fail (failwith e)) | Error e ->
+   Lwt.fail (failwith e)) | Ok false -> failwith "no users" | Error e ->
+   Lwt.fail (failwith e)))) *)
 
 let bind_functions fun1 fun2 =
   Lwt.bind fun1 (fun a ->

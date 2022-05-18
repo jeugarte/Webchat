@@ -144,8 +144,7 @@ module UserQuery = struct
             Ok (email, username))
           ~decode:(fun (email, username) -> Ok { email; username })
           Caqti_type.(tup2 string string)
-    @@ "SELECT email, username FROM\n     usrlst WHERE id = '" ^ uuid
-    ^ "'"
+    @@ "SELECT email, username FROM usrlst WHERE id = '" ^ uuid ^ "'"
 end
 
 let migrate () =
