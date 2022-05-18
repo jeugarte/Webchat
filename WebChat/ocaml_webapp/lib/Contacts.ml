@@ -38,11 +38,6 @@ module Contacts = struct
     (unit ->. unit)
     @@ "INSERT INTO contactslst (userid, contactid, favorite) VALUES ("
     ^ user ^ ", " ^ contact ^ ", " ^ fav ^ ")"
-  (* let get_contacts user = string ->* (Caqti_type.custom ~encode:(fun
-     ({user_id; contact_id} : get_contact) -> Ok (user, contact_id))
-     ~decode:(fun (user, contact_id) -> Ok {user; contact_id})
-     Caqti_type.(tup2 int int)) @@ "SELECT contactid FROM contactslst
-     WHERE userid = user" *)
 
   let get_contacts user =
     unit
