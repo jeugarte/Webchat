@@ -2,6 +2,20 @@ open OUnit2
 open Ocaml_webapp
 open User
 
+(* Testing Plan: We automatically tested the Bot and User modules using
+   OUnit testing and tested the rest of our modules through manual
+   testing. We chose to implement our testing this way because the rest
+   of our modules rely on PostgreSql commands which we found easier to
+   test using Sql commands on Datagrip. For the functions that we tested
+   with OUnit, we implemented a mixture of glass box testing and black
+   box testing to test functionality as well as error or unexpected
+   behavior handling. We believe that our testing approach of using
+   OUnit to test purely OCaml code, DataGrip to test OCaml code that
+   utilized the Caqti library, and Postman to test OCaml code that
+   utilized the Opium library demonstrates the correctness of our code
+   because we were able to test OCaml code, endpoints, and database
+   commands each in the way we found easiest. *)
+
 let string_of_yojson yojson =
   match yojson with
   | `Assoc

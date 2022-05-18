@@ -21,3 +21,6 @@ serve:
 
 test:
 	OCAMLRUNPARAM=b dune exec ocaml_webapp/test/main.exe
+
+docs: 
+	dune build @doc
