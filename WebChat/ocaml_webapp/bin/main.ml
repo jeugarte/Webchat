@@ -227,7 +227,7 @@ let make_favorite =
                                                "Success")
                                       | Error e -> Lwt.fail (failwith e))
                               | Ok false ->
-                                  failwith "contact does notexist"
+                                  failwith "contact does not exist"
                               | Error e -> Lwt.fail (failwith e))
                       | Error e1 -> Lwt.fail (failwith e1))
               | Error e2 -> Lwt.fail (failwith e2))))

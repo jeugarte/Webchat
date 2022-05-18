@@ -10,6 +10,12 @@
 
     <!-- Dropdown menu (on hover) -->
     <div id = "user-menu">
+      <!-- Conversations button -->
+      <div class = "link-button" v-on:click = "navigate('conversations')">
+        <i class = "fa fa-list-ul" aria-hidden = "true"></i>
+        <div class = "text" style = "font-size: 14px">Conversations</div>
+      </div>
+
       <!-- Logout button -->
       <div class = "link-button" v-on:click = "logOut">
         <i class = "fa fa-power-off" aria-hidden = "true"></i>
