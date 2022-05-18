@@ -41,8 +41,8 @@ module Contacts = struct
   (* let get_contacts user = string ->* (Caqti_type.custom ~encode:(fun
      ({user_id; contact_id} : get_contact) -> Ok (user, contact_id))
      ~decode:(fun (user, contact_id) -> Ok {user; contact_id})
-     Caqti_type.(tup2 int int)) @@ "SELECT contact_id FROM contactslst
-     WHERE user_id = user" *)
+     Caqti_type.(tup2 int int)) @@ "SELECT contactid FROM contactslst
+     WHERE userid = user" *)
 
   let get_contacts user =
     unit
@@ -50,7 +50,7 @@ module Contacts = struct
           ~encode:(fun s -> Ok s)
           ~decode:(fun s -> Ok s)
           Caqti_type.string
-    @@ "SELECT contact_id FROM contactslst WHERE user_id = " ^ user
+    @@ "SELECT contactid FROM contactslst WHERE userid = " ^ user
 
   let get_contacts_of_userid id =
     unit
@@ -61,18 +61,18 @@ module Contacts = struct
           ~decode:(fun (user_id, contact_id, favorite) ->
             Ok { user_id; contact_id; favorite })
           Caqti_type.(tup3 int int bool)
-    @@ "SELECT user_id, contact_id, favorite FROM contactslst WHERE \
-        user_id = " ^ id
+    @@ "SELECT userid, contactid, favorite FROM contactslst WHERE \
+        userid = " ^ id
 
   let make_favorite user contact =
     (unit ->. unit)
-    @@ "UPDATE contactslst SET favorite = true WHERE user_id = " ^ user
-    ^ " AND contact_id = " ^ contact ^ " AND favorite = false"
+    @@ "UPDATE contactslst SET favorite = true WHERE userid = '" ^ user
+    ^ "' AND contactid = '" ^ contact ^ "' AND favorite = false"
 
   let remove_favorite user contact =
     (unit ->. unit)
-    @@ "UPDATE contactslst SET favorite = false WHERE user_id = " ^ user
-    ^ " AND contact_id = " ^ contact ^ " AND favorite = true"
+    @@ "UPDATE contactslst SET favorite = false WHERE userid = '" ^ user
+    ^ "' AND contactid = '" ^ contact ^ "' AND favorite = true"
 
   let view_favorites user =
     unit
@@ -80,8 +80,17 @@ module Contacts = struct
           ~encode:(fun s -> Ok s)
           ~decode:(fun s -> Ok s)
           Caqti_type.string
-    @@ "SELECT contact_id FROM contactslst WHERE user_id = " ^ user
+    @@ "SELECT contactid FROM contactslst WHERE userid = " ^ user
     ^ " AND favorite = true"
+
+  let favorite_status user contact =
+    unit
+    ->! Caqti_type.custom
+          ~encode:(fun s -> Ok s)
+          ~decode:(fun s -> Ok s)
+          Caqti_type.bool
+    @@ "SELECT favorite FROM contactslst WHERE userid = '" ^ user
+    ^ "' AND contactid = '" ^ contact ^ "'"
 
   let query_contact user cont =
     unit
@@ -89,8 +98,8 @@ module Contacts = struct
           ~encode:(fun boolean -> Ok boolean)
           ~decode:(fun boolean -> Ok boolean)
           Caqti_type.bool
-    @@ "select exists(select 1 from contactslst where userid = '" ^ user
-    ^ "' and contactid = '" ^ cont ^ "')"
+    @@ "SELECT exists (SELECT 1 FROM contactslst WHERE userid = '"
+    ^ user ^ "' AND contactid = '" ^ cont ^ "')"
 end
 
 let migrate () =
@@ -157,15 +166,13 @@ let update_make_favorite user_id contact () =
        ())
     (fun result ->
       match result with
-      | Ok _ ->
-          Lwt.bind
-            (Db.find (view_favorites (string_of_int user_id)) ())
-            (fun result ->
-              match result with
-              | Ok data2 -> Lwt.return (Ok data2)
-              | Error error ->
-                  Lwt.fail (failwith (Caqti_error.show error)))
+      | Ok data -> Lwt.return (Ok data)
       | Error error -> Lwt.fail (failwith (Caqti_error.show error)))
+
+(* Lwt.bind (Db.find (view_favorites (string_of_int user_id)) ()) (fun
+   result -> match result with | Ok data2 -> Lwt.return (Ok data2) |
+   Error error -> Lwt.fail (failwith (Caqti_error.show error))) | Error
+   error -> Lwt.fail (failwith (Caqti_error.show error))) *)
 
 let read_contacts_given_userid id () =
   let open Contacts in
@@ -180,6 +187,17 @@ let read_contacts_given_userid id () =
       | Ok data -> Lwt.return (Ok data)
       | Error error -> failwith (Caqti_error.show error))
 
+let get_favorite user contact () =
+  let open Contacts in
+  Lwt.bind
+    (Db.find
+       (favorite_status (string_of_int user) (string_of_int contact))
+       ())
+    (fun result ->
+      match result with
+      | Ok data -> Lwt.return (Ok data)
+      | Error error -> Lwt.fail (failwith (Caqti_error.show error)))
+
 let update_remove_favorite user_id contact () =
   let open Contacts in
   Lwt.bind
@@ -188,12 +206,5 @@ let update_remove_favorite user_id contact () =
        ())
     (fun result ->
       match result with
-      | Ok _ ->
-          Lwt.bind
-            (Db.find (view_favorites (string_of_int user_id)) ())
-            (fun result ->
-              match result with
-              | Ok data2 -> Lwt.return (Ok data2)
-              | Error error ->
-                  Lwt.fail (failwith (Caqti_error.show error)))
+      | Ok data -> Lwt.return (Ok data)
       | Error error -> Lwt.fail (failwith (Caqti_error.show error)))

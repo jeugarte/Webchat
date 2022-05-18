@@ -35,7 +35,7 @@ export default {
   },
   created() {
     this.$store.commit("logOut");
-    this.$store.dispatch("create");
+    this.$store.dispatch("Create");
   }
 }
 

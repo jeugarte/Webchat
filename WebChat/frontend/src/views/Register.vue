@@ -53,7 +53,8 @@ export default {
         window.alert("Please make sure your password matches your confirmation password");
       } else {
         try {
-          await this.$store.dispatch("registerUser", this.form);
+          await this.$store.dispatch("RegisterUser", this.form);
+          await this.$store.dispatch("AddContact", "bob");
           await this.$router.push("/");
         } catch (error) {
           window.alert(error);

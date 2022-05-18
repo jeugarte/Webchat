@@ -6,7 +6,7 @@ type conversation_rec = {
 
 val migrate : unit -> (unit, 'a) result Lwt.t
 val rollback : unit -> (unit, 'a) result Lwt.t
-val insert_convo : string -> string -> unit -> (unit, 'a) result Lwt.t
+val insert_convo : string -> string -> unit -> (int, 'a) result Lwt.t
 val get_convo_name_from_id : int -> unit -> (string, 'a) result Lwt.t
 val get_creator_from_id : int -> unit -> (string, 'a) result Lwt.t
 

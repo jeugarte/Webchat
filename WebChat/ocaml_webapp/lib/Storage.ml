@@ -10,8 +10,14 @@ open Caqti_request.Infix
 open Caqti_type.Std
 
 type message = {
-  senderid : string;
-  convoid : string;
+  senderid : int;
+  convoid : int;
+  msg : string;
+}
+
+type message_str = {
+  senderemail : string;
+  convoid : int;
   msg : string;
 }
 
@@ -20,10 +26,16 @@ type sender_message = {
   msg : string;
 }
 
-type recipient_message = {
-  convoid : int;
-  msg : string;
-}
+let message_of_yojson yojson =
+  match yojson with
+  | `Assoc
+      [
+        ("sender_email", `String senderemail);
+        ("conversation_id", `Int convoid);
+        ("message", `String msg);
+      ] ->
+      { senderemail; convoid; msg }
+  | _ -> failwith "invalid convo id json"
 
 module Message = struct
   let create_msglst =
@@ -31,19 +43,13 @@ module Message = struct
     @@ {eos| 
       CREATE TABLE IF NOT EXISTS msglst (
         id SERIAL PRIMARY KEY,
-        senderid TEXT NOT NULL,
-        convoid TEXT NOT NULL,
-        msg TEXT NOT NULL,
-        timer timestamp
+        senderid INT NOT NULL,
+        convoid INT NOT NULL,
+        msg TEXT NOT NULL
       )
     |eos}
 
   let drop_msglst = (unit ->. unit) @@ "DROP TABLE msglst"
-
-  (*NOT IMPLEMENTED YET BUT USERS WILL HAVE A LIST OF MESSGAES, SO IT IS
-    A ONE OF MANY RELATIONSHIP WHERE ONE USER CAN HAVE MULTIPLE
-    MESSAGES. THATS WHEN WE USE AN ASSOCIATIVE TABLE BUT ILL LOOK INTO
-    THAT*)
 
   let add_msg_sql senderid convoid msg =
     (unit ->. unit)
@@ -59,20 +65,23 @@ module Message = struct
           Caqti_type.(tup2 int string)
     @@ "SELECT * FROM msglst WHERE senderid = ?"
 
-  let read_msg_of_recipient_sql =
-    string
-    ->* Caqti_type.custom
-          ~encode:(fun ({ convoid; msg } : recipient_message) ->
-            Ok (convoid, msg))
-          ~decode:(fun (convoid, msg) -> Ok { convoid; msg })
-          Caqti_type.(tup2 int string)
-    @@ "SELECT * FROM msglst WHERE convoid = ?"
+  (* let read_msg_of_recipient_sql = string ->* Caqti_type.custom
+     ~encode:(fun ({ convoid; msg } : recipient_message) -> Ok (convoid,
+     msg)) ~decode:(fun (convoid, msg) -> Ok { convoid; msg })
+     Caqti_type.(tup2 int string) @@ "SELECT * FROM msglst WHERE convoid
+     = ?" *)
 
-  (* let read_conversation_sql = string ->* (Caqti_type.custom
-     ~encode:(fun ({senderid; convoid; msg} : message)-> Ok (senderid,
-     convoid, msg)) ~decode:(fun (senderid, convoid, msg) -> Ok
-     {senderid; convoid; msg}) Caqti_type.(tup3 int int string)) @@
-     "SELECT * FROM msglst WHERE senderid = ? AND convoid = ?" *)
+  let read_conversation_sql ccid =
+    unit
+    ->* Caqti_type.custom
+          ~encode:(fun ({ senderid; convoid; msg } : message) ->
+            Ok (senderid, convoid, msg))
+          ~decode:(fun (senderid, convoid, msg) ->
+            Ok { senderid; convoid; msg })
+          Caqti_type.(tup3 int int string)
+    @@ "SELECT senderid, convoid, msg FROM msglst WHERE convoid = '"
+    ^ ccid ^ "'"
+
   let read_all_sql =
     unit
     ->* Caqti_type.custom
@@ -80,7 +89,7 @@ module Message = struct
             Ok (senderid, convoid, msg))
           ~decode:(fun (senderid, convoid, msg) ->
             Ok { senderid; convoid; msg })
-          Caqti_type.(tup3 string string string)
+          Caqti_type.(tup3 int int string)
     @@ "SELECT senderid, convoid, msg FROM msglst"
 end
 
@@ -101,7 +110,11 @@ let rollback () =
 let add_msg senderid convoid msg () =
   let open Message in
   Lwt.bind
-    (Db.exec (add_msg_sql senderid convoid msg) ())
+    (Db.exec
+       (add_msg_sql
+          (string_of_int senderid)
+          (string_of_int convoid) msg)
+       ())
     (fun result ->
       match result with
       | Ok data -> Lwt.return (Ok data)
@@ -118,27 +131,18 @@ let read_sent_msgs senderid () =
       | Ok data -> Lwt.return (Ok data)
       | Error error -> failwith (Caqti_error.show error))
 
-let read_recieved_msgs convoid () =
+let read_conversation_msgs convoid () =
   let open Message in
   Lwt.bind
-    (Db.iter_s read_msg_of_recipient_sql
-       (fun data -> Lwt_io.print (data.msg ^ "\n") >>= Lwt.return_ok)
-       convoid)
+    (Db.fold
+       (read_conversation_sql (string_of_int convoid))
+       (fun { senderid; convoid; msg } acc ->
+         { senderid; convoid; msg } :: acc)
+       () [])
     (fun result ->
       match result with
       | Ok data -> Lwt.return (Ok data)
       | Error error -> failwith (Caqti_error.show error))
-
-(* let read_conversation_msgs senderid convoid () = let open Message in
-   Lwt.bind ((Db.collect_list (read_conversation_sql) senderid) @@
-   (Db.collect_list (read_conversation_sql) senderid)) (fun result ->
-   match result with | Ok data -> Lwt.return (Ok data) | Error error ->
-   failwith (Caqti_error.show error)) *)
-
-(* TODO let read_parsed_convo_msgs senderid convoid () = let open
-   Message in let sender = read_sent_msgs senderid in let recipient =
-   read_received_msgs convoid in sender @@ recipient (this is how it
-   should work in theory) *)
 
 let read_all () =
   let open Message in

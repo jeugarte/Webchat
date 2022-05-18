@@ -35,7 +35,7 @@ export default {
   methods: {
     postLogin: async function() {
       try {
-        await this.$store.dispatch("login", this.form);
+        await this.$store.dispatch("Login", this.form);
         await this.$router.push("/");
       } catch (error) {
         window.alert(error);

@@ -9,52 +9,8 @@ const state = {
     email: null,
     username: null
   },
-  contacts: [
-    {
-      email: "test@gmail.com",
-      username: "test",
-      favorite: true,
-      num: 5
-    },
-    {
-      email: "hello@gmail.com",
-      username: "HELLO",
-      favorite: false,
-      num: 1
-    },
-    {
-      email: "owen.wetherbee@gmail.com",
-      username: "Oe358",
-      favorite: false,
-      num: 0
-    },
-    {
-      email: "ocw6@gmail.com",
-      username: "ocw6",
-      favorite: true,
-      num: 120
-    },
-    {
-      email: "s019628@gmail.com",
-      username: "Student",
-      favorite: false,
-      num: 10
-    }
-  ],
-  conversations: [
-    {
-      id: 1,
-      name: "Conversation 1",
-      creator: "ocw6@gmail.com",
-      users: ["sjj@gmail.com", "hello@gmail.com", "test@gmail.com"]
-    },
-    {
-      id: 2,
-      name: "FUN TIMES",
-      creator: "owen.wetherbee@gmail.com",
-      users: ["sjj@gmail.com", "ocw6@gmail.com", "test@gmail.com"]
-    }
-  ]
+  contacts: [],
+  conversations: []
 };
 const getters = {
   Confirmations: state => state.confirmations,
@@ -76,10 +32,10 @@ const actions = {
       commit('removeConfirmation', id);
     }, 2000);
   },
-  async create() {
+  async Create() {
     await axios.get("create");
   },
-  async registerUser({commit}, form) {
+  async RegisterUser({commit}, form) {
     await axios.post("register",
       {email: form.email, password: form.password, username: form.username}).
     then(function(response) {
@@ -90,7 +46,7 @@ const actions = {
       }
     });
   },
-  async login({commit}, form) {
+  async Login({commit}, form) {
     await axios.post("login",
       {email: form.user, password: form.password, username: form.user}).
     then(function(response) {
@@ -104,6 +60,74 @@ const actions = {
   async SetUserName({commit, getters}, name) {
     // set user name endpoint
     commit('setUserName', {email: state.user.email, username: name});
+  },
+  async GetContacts({commit}) {
+    await axios.post("getContacts", {email: state.user.email}).then(function(response) {
+      if (response.data === "Internal Server Error") {
+        console.log("Internal Server Error");
+      } else {
+        commit('setContacts', response.data.data.sort(function(a, b) {return (a.email < b.email) ? -1 : (a.email > b.email ? 1 : 0)}));
+      }
+    });
+  },
+  async AddContact(_, contact) {
+    await axios.post("addContact", {user_email: state.user.email, contact_email: contact}).then(function(response) {
+      if (response.data !== "Success") {
+        throw "Error";
+      }
+    });
+  },
+  async MakeFavorite(_, contact) {
+    await axios.post("makeFavorite", {user_email: state.user.email, contact_email: contact}).then(function(response) {
+      if (response.data !== "Success") {
+        throw "Error";
+      }
+    });
+  },
+  async RemoveFavorite(_, contact) {
+    await axios.post("removeFavorite", {user_email: state.user.email, contact_email: contact}).then(function(response) {
+      if (response.data !== "Success") {
+        throw "Error";
+      }
+    });
+  },
+  async GetConversations({commit}) {
+    await axios.post("getConversations", {email: state.user.email}).then(function(response) {
+      if (response.data === "Internal Server Error") {
+        console.log("Internal Server Error");
+      } else {
+        let conversations = [];
+
+        response.data.data.forEach(function(convo) {
+
+          let creator = convo.creator_email;
+          let creatorFiltered = state.contacts.filter(function(contact) {return contact.email === convo.creator_email});
+          if (creatorFiltered.length > 0) {
+            creator = creatorFiltered[0];
+          }
+
+          let users = convo.users;
+          users.forEach(function(user) {
+            let userFiltered = state.contacts.filter(function(contact) {return contact.email === user});
+            if (userFiltered.length > 0) {
+              user = userFiltered[0];
+            }
+          });
+
+
+          conversations.push({name: convo.conversation_name, id: convo.conversation_id, creator: creator, users: users});
+        });
+
+        commit('setConversations', conversations.sort(function(a, b) {return (a.name < b.name) ? -1 : (a.name > b.name ? 1 : 0)}));
+      }
+    });
+  },
+  async MakeConversation(_, {name, contacts}) {
+    await axios.post("makeConversation", {conversation_name: name, creator_name: state.user.email, contacts: contacts}).then(function(response) {
+      if (response.data !== "Success") {
+        throw "Error";
+      }
+    });
   }
 };
 const mutations = {
@@ -132,6 +156,12 @@ const mutations = {
   },
   logOut(state) {
     state.user = {email: null, username: null};
+  },
+  setContacts(state, contacts) {
+    state.contacts = contacts;
+  },
+  setConversations(state, conversations) {
+    state.conversations = conversations;
   }
 };
 export default {

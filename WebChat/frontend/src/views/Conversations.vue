@@ -104,9 +104,17 @@ export default {
       return output;
     },
 
-    addConversation: function() {
+    addConversation: async function() {
+      await this.$store.dispatch('MakeConversation', {name: this.newConvo.name, contacts: this.newConvo.members});
+      await this.$store.dispatch('GetConversations');
+      this.$store.dispatch("Confirmation", "Conversation added successfully");
 
+      this.newConvo = {name: "", members: []};
+      this.startConvoPopup = false;
     }
+  },
+  mounted() {
+    this.$store.dispatch('GetConversations');
   }
 }
 </script>
@@ -321,10 +329,14 @@ export default {
   justify-content: space-between;
   align-items: center;
   width: 85%;
-  padding: 30px 0 20px 0;
+  padding: 20px 0 15px 0;
   box-sizing: border-box;
   margin: 30px 0 10px 0;
   border-bottom: 1px solid #ff819c;
+}
+
+.start-convo-popup .heading {
+  margin: 0;
 }
 
 h1 {

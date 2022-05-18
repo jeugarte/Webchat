@@ -88,7 +88,7 @@
               <span v-on:click = "startConvoPopup = true; newConvo.members = [contact.email]" class = "start-convo" title = "Start conversation with contact"><i class = "fa fa-plus"></i></span>
             </div>
             <div class = "fav-info">
-              <span class = "favorite" v-bind:title = "contact.favorite ? 'Unfavorite contact' : 'Favorite contact'"><i class = "fa" v-bind:class = "contact.favorite ? 'fa-star' : 'fa-star-o'"></i></span>
+              <span class = "favorite" v-on:click = "toggleFavorite(contact)" v-bind:title = "contact.favorite ? 'Unfavorite contact' : 'Favorite contact'"><i class = "fa" v-bind:class = "contact.favorite ? 'fa-star' : 'fa-star-o'"></i></span>
             </div>
           </div>
         </div>
@@ -117,38 +117,6 @@ export default {
         name: "",
         members: []
       },
-      contacts: [
-        {
-          email: "test@gmail.com",
-          username: "test",
-          favorite: true,
-          num: 5
-        },
-        {
-          email: "hello@gmail.com",
-          username: "HELLO",
-          favorite: false,
-          num: 1
-        },
-        {
-          email: "owen.wetherbee@gmail.com",
-          username: "Oe358",
-          favorite: false,
-          num: 0
-        },
-        {
-          email: "ocw6@gmail.com",
-          username: "ocw6",
-          favorite: true,
-          num: 120
-        },
-        {
-          email: "s019628@gmail.com",
-          username: "Student",
-          favorite: false,
-          num: 10
-        }
-      ]
     }
   },
   computed: {
@@ -183,21 +151,41 @@ export default {
       this.editingName = false;
     },
 
-    addContact: function() {
-
-
+    addContact: async function() {
+      this.$store.commit('setProcessing', true);
+      try {
+        await this.$store.dispatch('AddContact', this.newContact);
+        await this.$store.dispatch('GetContacts');
+        this.$store.commit('setProcessing', false);
+        this.$store.dispatch("Confirmation", "Contact added successfully");
+      } catch (_) {
+        this.$store.commit('setProcessing', false);
+        this.$store.dispatch("Confirmation", "Not a valid contact");
+      }
+      this.newContact = "";
       this.addContactPopup = false;
     },
+    addConversation: async function() {
+      await this.$store.dispatch('MakeConversation', {name: this.newConvo.name, contacts: this.newConvo.members});
+      await this.$store.dispatch('GetConversations');
+      this.$store.dispatch("Confirmation", "Conversation added successfully");
 
-    addConversation: function() {
-
-
+      this.newConvo = {name: "", members: []};
       this.startConvoPopup = false;
     },
-
-    makeFavorite: function() {
-
+    toggleFavorite: async function(contact) {
+      if (contact.favorite) {
+        await this.$store.dispatch('RemoveFavorite', contact.email);
+        this.$store.dispatch("Confirmation", contact.username + " unfavorited");
+      } else {
+        await this.$store.dispatch('MakeFavorite', contact.email);
+        this.$store.dispatch("Confirmation", contact.username + " favorited");
+      }
+      await this.$store.dispatch('GetContacts');
     }
+  },
+  mounted() {
+    this.$store.dispatch('GetContacts');
   },
   created() {
     this.username = this.user.username;
