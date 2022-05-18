@@ -12,6 +12,13 @@ type users_conversation = {
   user_id : int;
 }
 
+type conversation_id = { id : int }
+
+let convo_of_yojson yojson =
+  match yojson with
+  | `Assoc [ ("id", `Int id) ] -> { id }
+  | _ -> failwith "invalid convo id json"
+
 module UserConversation = struct
   let create_userconvo =
     (unit ->. unit)
@@ -56,7 +63,7 @@ module UserConversation = struct
     ->! Caqti_type.custom
           ~encode:(fun s -> Ok s)
           ~decode:(fun s -> Ok s)
-          Caqti_type.string
+          Caqti_type.int
     @@ "SELECT users_id FROM userconvolst WHERE conversation_id = '"
     ^ convo ^ "'"
 end
@@ -111,7 +118,10 @@ let read_conversations_given_user id () =
 let get_userid_from_conversationid id () =
   let open UserConversation in
   Lwt.bind
-    (Db.find (get_userid_from_convo (string_of_int id)) ())
+    (Db.fold
+       (get_userid_from_convo (string_of_int id))
+       (fun temp_id acc -> temp_id :: acc)
+       () [])
     (fun result ->
       match result with
       | Ok data -> Lwt.return (Ok data)

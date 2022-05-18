@@ -22,9 +22,10 @@ val get_favorites : int -> unit -> (string, 'a) result Lwt.t
 val update_make_favorite : int -> int -> unit -> (unit, 'a) result Lwt.t
 
 val update_remove_favorite :
-  int -> int -> unit -> (string, 'a) result Lwt.t
+  int -> int -> unit -> (unit, 'a) result Lwt.t
 
 val read_contacts_given_userid :
   int -> unit -> (get_contact list, 'a) result Lwt.t
 
 val does_contact_exist : int -> int -> unit -> (bool, 'a) result Lwt.t
+val get_favorite : int -> int -> unit -> (bool, 'a) result Lwt.t

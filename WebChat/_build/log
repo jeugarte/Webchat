@@ -1,9 +1,9 @@
-# dune exec ocaml_webapp/bin/main.exe
+# dune build
 # OCAMLPARAM: unset
 # Shared cache: disabled
-# Workspace root: /Users/stanleyjiang/cs3110/webchat/WebChat
+# Workspace root: /home/jeu9/cs3110/WebChat/webchat/WebChat
 # Auto-detected concurrency: 8
-$ /Users/stanleyjiang/.opam/cs3110-2022sp/bin/ocamlc.opt -config > /var/folders/rz/6r_wzlv10dzfyx9490vs44800000gn/T/dune_36adb3_output
+$ /home/jeu9/.opam/4.13.1/bin/ocamlc.opt -config > /tmp/dune_b4cb97_output
 # Dune context:
 #  { name = "default"
 #  ; kind = "default"
@@ -12,77 +12,74 @@ $ /Users/stanleyjiang/.opam/cs3110-2022sp/bin/ocamlc.opt -config > /var/folders/
 #  ; for_host = None
 #  ; fdo_target_exe = None
 #  ; build_dir = "default"
-#  ; toplevel_path =
-#      Some External "/Users/stanleyjiang/.opam/cs3110-2022sp/lib/toplevel"
-#  ; ocaml_bin = External "/Users/stanleyjiang/.opam/cs3110-2022sp/bin"
-#  ; ocaml = Ok External "/Users/stanleyjiang/.opam/cs3110-2022sp/bin/ocaml"
-#  ; ocamlc = External "/Users/stanleyjiang/.opam/cs3110-2022sp/bin/ocamlc.opt"
-#  ; ocamlopt =
-#      Ok External "/Users/stanleyjiang/.opam/cs3110-2022sp/bin/ocamlopt.opt"
-#  ; ocamldep =
-#      Ok External "/Users/stanleyjiang/.opam/cs3110-2022sp/bin/ocamldep.opt"
-#  ; ocamlmklib =
-#      Ok External "/Users/stanleyjiang/.opam/cs3110-2022sp/bin/ocamlmklib.opt"
+#  ; toplevel_path = Some External "/home/jeu9/.opam/4.13.1/lib/toplevel"
+#  ; ocaml_bin = External "/home/jeu9/.opam/4.13.1/bin"
+#  ; ocaml = Ok External "/home/jeu9/.opam/4.13.1/bin/ocaml"
+#  ; ocamlc = External "/home/jeu9/.opam/4.13.1/bin/ocamlc.opt"
+#  ; ocamlopt = Ok External "/home/jeu9/.opam/4.13.1/bin/ocamlopt.opt"
+#  ; ocamldep = Ok External "/home/jeu9/.opam/4.13.1/bin/ocamldep.opt"
+#  ; ocamlmklib = Ok External "/home/jeu9/.opam/4.13.1/bin/ocamlmklib.opt"
 #  ; env =
 #      map
-#        { "DUNE_OCAML_HARDCODED" :
-#            "/Users/stanleyjiang/.opam/cs3110-2022sp/lib"
-#        ; "DUNE_OCAML_STDLIB" :
-#            "/Users/stanleyjiang/.opam/cs3110-2022sp/lib/ocaml"
-#        ; "DUNE_SOURCEROOT" : "/Users/stanleyjiang/cs3110/webchat/WebChat"
+#        { "DUNE_OCAML_HARDCODED" : "/home/jeu9/.opam/4.13.1/lib"
+#        ; "DUNE_OCAML_STDLIB" : "/home/jeu9/.opam/4.13.1/lib/ocaml"
+#        ; "DUNE_SOURCEROOT" : "/home/jeu9/cs3110/WebChat/webchat/WebChat"
 #        ; "INSIDE_DUNE" :
-#            "/Users/stanleyjiang/cs3110/webchat/WebChat/_build/default"
+#            "/home/jeu9/cs3110/WebChat/webchat/WebChat/_build/default"
 #        ; "OCAMLFIND_IGNORE_DUPS_IN" :
-#            "/Users/stanleyjiang/cs3110/webchat/WebChat/_build/install/default/lib"
+#            "/home/jeu9/cs3110/WebChat/webchat/WebChat/_build/install/default/lib"
 #        ; "OCAMLPATH" :
-#            "/Users/stanleyjiang/cs3110/webchat/WebChat/_build/install/default/lib"
+#            "/home/jeu9/cs3110/WebChat/webchat/WebChat/_build/install/default/lib"
 #        ; "OCAMLTOP_INCLUDE_PATH" :
-#            "/Users/stanleyjiang/cs3110/webchat/WebChat/_build/install/default/lib/toplevel"
+#            "/home/jeu9/cs3110/WebChat/webchat/WebChat/_build/install/default/lib/toplevel"
 #        ; "OCAML_COLOR" : "always"
 #        ; "OPAMCOLOR" : "always"
 #        }
-#  ; findlib_path = [ External "/Users/stanleyjiang/.opam/cs3110-2022sp/lib" ]
+#  ; findlib_path = [ External "/home/jeu9/.opam/4.13.1/lib" ]
 #  ; arch_sixtyfour = true
 #  ; natdynlink_supported = true
 #  ; supports_shared_libraries = true
 #  ; ocaml_config =
-#      { version = "4.12.0"
-#      ; standard_library_default =
-#          "/Users/stanleyjiang/.opam/cs3110-2022sp/lib/ocaml"
-#      ; standard_library = "/Users/stanleyjiang/.opam/cs3110-2022sp/lib/ocaml"
+#      { version = "4.13.1"
+#      ; standard_library_default = "/home/jeu9/.opam/4.13.1/lib/ocaml"
+#      ; standard_library = "/home/jeu9/.opam/4.13.1/lib/ocaml"
 #      ; standard_runtime = "the_standard_runtime_variable_was_deleted"
 #      ; ccomp_type = "cc"
-#      ; c_compiler = "cc"
-#      ; ocamlc_cflags = [ "-O2"; "-fno-strict-aliasing"; "-fwrapv" ]
-#      ; ocamlc_cppflags = [ "-D_FILE_OFFSET_BITS=64"; "-D_REENTRANT" ]
-#      ; ocamlopt_cflags = [ "-O2"; "-fno-strict-aliasing"; "-fwrapv" ]
-#      ; ocamlopt_cppflags = [ "-D_FILE_OFFSET_BITS=64"; "-D_REENTRANT" ]
+#      ; c_compiler = "gcc"
+#      ; ocamlc_cflags =
+#          [ "-O2"; "-fno-strict-aliasing"; "-fwrapv"; "-pthread"; "-fPIC" ]
+#      ; ocamlc_cppflags = [ "-D_FILE_OFFSET_BITS=64" ]
+#      ; ocamlopt_cflags =
+#          [ "-O2"; "-fno-strict-aliasing"; "-fwrapv"; "-pthread"; "-fPIC" ]
+#      ; ocamlopt_cppflags = [ "-D_FILE_OFFSET_BITS=64" ]
 #      ; bytecomp_c_compiler =
-#          [ "cc"
+#          [ "gcc"
 #          ; "-O2"
 #          ; "-fno-strict-aliasing"
 #          ; "-fwrapv"
+#          ; "-pthread"
+#          ; "-fPIC"
 #          ; "-D_FILE_OFFSET_BITS=64"
-#          ; "-D_REENTRANT"
 #          ]
-#      ; bytecomp_c_libraries = [ "-lm"; "-lpthread" ]
+#      ; bytecomp_c_libraries = [ "-lm"; "-ldl"; "-lpthread" ]
 #      ; native_c_compiler =
-#          [ "cc"
+#          [ "gcc"
 #          ; "-O2"
 #          ; "-fno-strict-aliasing"
 #          ; "-fwrapv"
+#          ; "-pthread"
+#          ; "-fPIC"
 #          ; "-D_FILE_OFFSET_BITS=64"
-#          ; "-D_REENTRANT"
 #          ]
-#      ; native_c_libraries = [ "-lm" ]
+#      ; native_c_libraries = [ "-lm"; "-ldl" ]
 #      ; native_pack_linker = [ "ld"; "-r"; "-o" ]
 #      ; cc_profile = []
-#      ; architecture = "arm64"
+#      ; architecture = "amd64"
 #      ; model = "default"
 #      ; int_size = 63
 #      ; word_size = 64
-#      ; system = "macosx"
-#      ; asm = [ "clang"; "-c"; "-Wno-trigraphs" ]
+#      ; system = "linux"
+#      ; asm = [ "as" ]
 #      ; asm_cfi_supported = true
 #      ; with_frame_pointers = false
 #      ; ext_exe = ""
@@ -93,24 +90,33 @@ $ /Users/stanleyjiang/.opam/cs3110-2022sp/bin/ocamlc.opt -config > /var/folders/
 #      ; os_type = "Unix"
 #      ; default_executable_name = "a.out"
 #      ; systhread_supported = true
-#      ; host = "aarch64-apple-darwin20.6.0"
-#      ; target = "aarch64-apple-darwin20.6.0"
+#      ; host = "x86_64-pc-linux-gnu"
+#      ; target = "x86_64-pc-linux-gnu"
 #      ; profiling = false
 #      ; flambda = false
 #      ; spacetime = false
 #      ; safe_string = true
-#      ; exec_magic_number = "Caml1999X029"
-#      ; cmi_magic_number = "Caml1999I029"
-#      ; cmo_magic_number = "Caml1999O029"
-#      ; cma_magic_number = "Caml1999A029"
-#      ; cmx_magic_number = "Caml1999Y029"
-#      ; cmxa_magic_number = "Caml1999Z029"
-#      ; ast_impl_magic_number = "Caml1999M029"
-#      ; ast_intf_magic_number = "Caml1999N029"
-#      ; cmxs_magic_number = "Caml1999D029"
-#      ; cmt_magic_number = "Caml1999T029"
+#      ; exec_magic_number = "Caml1999X030"
+#      ; cmi_magic_number = "Caml1999I030"
+#      ; cmo_magic_number = "Caml1999O030"
+#      ; cma_magic_number = "Caml1999A030"
+#      ; cmx_magic_number = "Caml1999Y030"
+#      ; cmxa_magic_number = "Caml1999Z030"
+#      ; ast_impl_magic_number = "Caml1999M030"
+#      ; ast_intf_magic_number = "Caml1999N030"
+#      ; cmxs_magic_number = "Caml1999D030"
+#      ; cmt_magic_number = "Caml1999T030"
 #      ; natdynlink_supported = true
 #      ; supports_shared_libraries = true
 #      ; windows_unicode = false
 #      }
 #  }
+$ (cd _build/default && /home/jeu9/.opam/4.13.1/bin/ocamldep.opt -modules -impl ocaml_webapp/bin/main.ml) > _build/default/ocaml_webapp/bin/.main.eobjs/main.ml.d
+$ (cd _build/default && /home/jeu9/.opam/4.13.1/bin/ocamlopt.opt -w @1..3@5..28@30..39@43@46..47@49..57@61..62-40 -strict-sequence -strict-formats -short-paths -keep-locs -g -I ocaml_webapp/bin/.main.eobjs/byte -I ocaml_webapp/bin/.main.eobjs/native -I /home/jeu9/.opam/4.13.1/lib/angstrom -I /home/jeu9/.opam/4.13.1/lib/astring -I /home/jeu9/.opam/4.13.1/lib/base64 -I /home/jeu9/.opam/4.13.1/lib/bigarray-compat -I /home/jeu9/.opam/4.13.1/lib/bigstringaf -I /home/jeu9/.opam/4.13.1/lib/biniou -I /home/jeu9/.opam/4.13.1/lib/caqti -I /home/jeu9/.opam/4.13.1/lib/caqti-driver-postgresql -I /home/jeu9/.opam/4.13.1/lib/caqti-lwt -I /home/jeu9/.opam/4.13.1/lib/cmdliner -I /home/jeu9/.opam/4.13.1/lib/cstruct -I /home/jeu9/.opam/4.13.1/lib/easy-format -I /home/jeu9/.opam/4.13.1/lib/eqaf -I /home/jeu9/.opam/4.13.1/lib/eqaf/bigstring -I /home/jeu9/.opam/4.13.1/lib/eqaf/cstruct -I /home/jeu9/.opam/4.13.1/lib/faraday -I /home/jeu9/.opam/4.13.1/lib/faraday-lwt -I /home/jeu9/.opam/4.13.1/lib/faraday-lwt-unix -I /home/jeu9/.opam/4.13.1/lib/fmt -I /home/jeu9/.opam/4.13.1/lib/hmap -I /home/jeu9/.opam/4.13.1/lib/httpaf -I /home/jeu9/.opam/4.13.1/lib/httpaf-lwt-unix -I /home/jeu9/.opam/4.13.1/lib/logs -I /home/jeu9/.opam/4.13.1/lib/lwt -I /home/jeu9/.opam/4.13.1/lib/lwt/unix -I /home/jeu9/.opam/4.13.1/lib/magic-mime -I /home/jeu9/.opam/4.13.1/lib/mirage-crypto -I /home/jeu9/.opam/4.13.1/lib/mmap -I /home/jeu9/.opam/4.13.1/lib/mtime -I /home/jeu9/.opam/4.13.1/lib/mtime/clock/os -I /home/jeu9/.opam/4.13.1/lib/multipart-form-data -I /home/jeu9/.opam/4.13.1/lib/ocaml/threads -I /home/jeu9/.opam/4.13.1/lib/ocplib-endian -I /home/jeu9/.opam/4.13.1/lib/ocplib-endian/bigstring -I /home/jeu9/.opam/4.13.1/lib/opium -I /home/jeu9/.opam/4.13.1/lib/ounit2 -I /home/jeu9/.opam/4.13.1/lib/ounit2/advanced -I /home/jeu9/.opam/4.13.1/lib/postgresql -I /home/jeu9/.opam/4.13.1/lib/ptime -I /home/jeu9/.opam/4.13.1/lib/re -I /home/jeu9/.opam/4.13.1/lib/result -I /home/jeu9/.opam/4.13.1/lib/rock -I /home/jeu9/.opam/4.13.1/lib/seq -I /home/jeu9/.opam/4.13.1/lib/sexplib0 -I /home/jeu9/.opam/4.13.1/lib/stdlib-shims -I /home/jeu9/.opam/4.13.1/lib/stringext -I /home/jeu9/.opam/4.13.1/lib/tyxml -I /home/jeu9/.opam/4.13.1/lib/tyxml/functor -I /home/jeu9/.opam/4.13.1/lib/uri -I /home/jeu9/.opam/4.13.1/lib/uutf -I /home/jeu9/.opam/4.13.1/lib/yojson -I ocaml_webapp/lib/.ocaml_webapp.objs/byte -I ocaml_webapp/lib/.ocaml_webapp.objs/native -intf-suffix .ml -no-alias-deps -opaque -open Dune__exe -o ocaml_webapp/bin/.main.eobjs/native/dune__exe__Main.cmx -c -impl ocaml_webapp/bin/main.ml)
+> File "ocaml_webapp/bin/main.ml", line 114, characters 16-18:
+> 114 |               | Ok accepted -> accepted
+>                       ^^
+> Error: This variant pattern is expected to have type
+>          [> `Assoc of (string * [> `String of string ]) list ] list
+>        There is no constructor Ok within type list
+[2]

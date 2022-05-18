@@ -6,7 +6,7 @@ make all --print-data-base --no-builtin-variables --no-builtin-rules --question
 # This is free software: you are free to change and redistribute it.
 # There is NO WARRANTY, to the extent permitted by law.
 
-# Make data base, printed on Tue May 17 16:25:30 2022
+# Make data base, printed on Tue May 17 17:34:37 2022
 
 # Variables
 
@@ -61,7 +61,7 @@ NVM_BIN = /home/jeu9/.nvm/versions/node/v16.14.0/bin
 # environment
 VSCODE_LOG_STACK = false
 # environment
-VSCODE_IPC_HOOK_CLI = /tmp/vscode-ipc-f9e3e3d0-8e3f-4528-aacc-a50f7413eb12.sock
+VSCODE_IPC_HOOK_CLI = /tmp/vscode-ipc-2dac2cca-467a-4cdd-8e7f-9e91f2b20fb8.sock
 # default
 .FEATURES := target-specific order-only second-expansion else-if shortest-stem undefine oneshell archives jobserver output-sync check-symlink load
 # environment
@@ -271,7 +271,7 @@ serve:
 # strcache performance: lookups = 46 / hit rate = 28%
 # hash-table stats:
 # Load=33/8192=0%, Rehash=0, Collisions=1/46=2%
-# Finished Make data base on Tue May 17 16:25:30 2022
+# Finished Make data base on Tue May 17 17:34:37 2022
 
  
 make: *** No rule to make target 'all'.  Stop.

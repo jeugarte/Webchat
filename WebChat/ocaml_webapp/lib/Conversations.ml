@@ -58,7 +58,7 @@ module Conversations = struct
             (fun (conversation_id, conversation_name, creator_id) ->
             Ok { conversation_id; conversation_name; creator_id })
           Caqti_type.(tup3 int string string)
-    @@ "SELECT id, convo_name, creator_name FROM convolst WHERE id = "
+    @@ "SELECT id, convo_name, creator_name FROM convolst WHERE id = '"
     ^ uuid ^ "'"
 
   let get_id_from_convo_name =
