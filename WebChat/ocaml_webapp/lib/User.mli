@@ -70,6 +70,13 @@ val user_of_email : string -> unit -> (string, 'a) result Lwt.t
     find a user with the specfic email and then returning their username
     from usrlst RI: email MUST be somewhere in the table*)
 
+val change_username :
+  string -> string -> unit -> (unit, 'a) result Lwt.t
+(** [change_username] takes in a string email and string username, in
+    which the databases updates the current username of the given email
+    with the new username given. Returns Lwt.t unit. RI: email is an
+    existing and unique email in usrlst*)
+
 val email_of_user : string -> unit -> (string, 'a) result Lwt.t
 (** [email_of_user] takes in a string username, executing the database
     to find a user with the specfic username and then returning their

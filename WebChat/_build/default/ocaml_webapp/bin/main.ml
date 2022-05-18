@@ -1,11 +1,11 @@
 open Opium
 open Ocaml_webapp
 
-(* register_user creates a post request that takes in a json containing
-   the email, password, username of a new user and outputs "Email taken"
-   if users contains the email already, "Username taken" if users
-   contains the username already, and "Success" if the information can
-   be used to create a user that is added to users *)
+(** [register_user] creates a post request that takes in a json
+    containing the email, password, username of a new user and outputs
+    "Email taken" if users contains the email already, "Username taken"
+    if users contains the username already, and "Success" if the
+    information can be used to create a user that is added to usrlst *)
 let register_user =
   App.post "/register" (fun request ->
       Lwt.bind (Request.to_json_exn request) (fun user_json ->
@@ -31,9 +31,10 @@ let register_user =
                       | Error e -> Lwt.fail (failwith e))
               | Error e -> Lwt.fail (failwith e))))
 
-(* login_user creates a post request that takes in the json containing
-   the information for a user x and outputs "No User" if x is not in
-   users and a json containing the email and username of x otherwise *)
+(** [login_user] creates a post request that takes in the json
+    containing the information for a user x and outputs "No User" if x
+    is not in users and a json containing the email and username of x
+    otherwise *)
 let login_user =
   App.post "/login" (fun request ->
       Lwt.bind (Request.to_json_exn request) (fun user_json ->
@@ -82,19 +83,21 @@ let login_user =
                   Lwt.return (Response.of_plain_text "No User")
               | Error e -> Lwt.fail (failwith e))))
 
-(* let rec ids_to_usernames lst = let open User in match lst with | []
-   -> Lwt.return [] | h :: t -> Lwt.bind (read_all_given_id h ()) (fun
-   response -> match response with | Ok one_contact -> ( match
-   one_contact with | [] -> failwith "DNE" | [ h2 ] -> Lwt.bind
-   (ids_to_usernames t) (fun s -> Lwt.return (h2.email :: s)) | _ ->
-   failwith "only one element") | Error e -> Lwt.fail (failwith e)) *)
+let change_username =
+  App.post "/changeUsername" (fun request ->
+      Lwt.bind (Request.to_json_exn request) (fun a ->
+          match a with
+          | `Assoc
+              [
+                ("email", `String email); ("username", `String username);
+              ] ->
+              Lwt.bind (User.change_username email username ())
+                (fun b ->
+                  match b with
+                  | Ok () -> Lwt.return (Response.make ~status:`OK ())
+                  | Error e -> Lwt.fail (failwith e))
+          | _ -> Lwt.return (Response.of_plain_text "invalid username")))
 
-(* let users_from_convo convoid = let open UserConversation in Lwt.bind
-   (get_userid_from_conversationid convoid ()) (fun list_response ->
-   match list_response with | Ok user_list -> Lwt.bind (ids_to_usernames
-   user_list) (fun response -> match response with | Ok accepted ->
-   accepted | Error e -> Lwt.fail (failwith e)) | Error e -> Lwt.fail
-   (failwith e)) *)
 let rec wrap_userlist (u : string list) =
   match u with [] -> [] | h :: t -> `String h :: wrap_userlist t
 
@@ -159,6 +162,12 @@ let rec gen_user_convos convoid userlist creatorid =
                   | Error e -> Lwt.fail (failwith e))
           | Error e -> Lwt.fail (failwith e))
 
+(** [make_conversation] creates a post request that takes in a json
+    containing the conversation name, creator name, and list of contacts
+    of a new conversation and outputs "invalid" if json does not parse
+    correctly, "failure"/Lwt.fail if contacts from list are not real or
+    actual contacts of user, and "Success" if the information can be
+    used to create a conversation that is added to convolst*)
 let make_conversation =
   App.post "/makeConversation" (fun request ->
       Lwt.bind (Request.to_json_exn request) (fun input_json ->
@@ -212,8 +221,12 @@ let make_conversation =
                       | Error e -> Lwt.fail (failwith e))
               | Error e -> Lwt.fail (failwith e))))
 
-(** [get_conversations] returns the conversations of a specfic user RI:
-    takes in a user id*)
+(** [get_conversations] creates a post request that takes in a json
+    containing the email of the user and outputs "failure"/Lwt.fail if
+    email is invalid or "Success" if the information can be used to
+    retireve the conversations that are tied to the user email given.
+    This is given from retriving data from usrlst, convolst, and
+    userconvolst*)
 let get_conversations =
   let open UserConversation in
   let open User in
@@ -264,8 +277,11 @@ let rec contacts_helper lst =
               | _ -> failwith "only one element")
           | Error e -> Lwt.fail (failwith e))
 
-(** [get_contacts] returns an association list of a user's contacts with
-    their email and username RI: takes in a user id*)
+(** [get_contacts] creates a post request that takes in a json
+    containing the email of the user and outputs "failure"/Lwt.fail if
+    email is invalid or "Success" if the information can be used to
+    retireve the contacts that are tied to the user email given. This is
+    given from retriving data from usrlst and contactslst*)
 let get_contacts =
   let open User in
   let open Contacts in
@@ -297,11 +313,11 @@ let get_contacts =
     users) (fun users_json -> let user_info = users_json |>
     User.user_of_yojson in ))*)
 
-(** [make_favorite] returns a success text when the contact is now a
-    favorite contact of the user.contact_id Otherwise, it returns
-    "contact does not exist" or an Lwt error RI: user and contact are
-    ids represented as ids*)
-
+(** [make_favorite] creates a post request that takes in a json
+    containing the email of the user and contact and outputs
+    "failure"/Lwt.fail if emails are invalid or "Success" if the
+    information can be used to update the favorite value of the user and
+    contact that are tied to contactslst. *)
 let make_favorite =
   let open User in
   let open Contacts in
@@ -336,6 +352,11 @@ let make_favorite =
                       | Error e1 -> Lwt.fail (failwith e1))
               | Error e2 -> Lwt.fail (failwith e2))))
 
+(** [remove_favorite] creates a post request that takes in a json
+    containing the email of the user and contact and outputs
+    "failure"/Lwt.fail if emails are invalid or "Success" if the
+    information can be used to update the favorite value of the user and
+    contact that are tied to contactslst. *)
 let remove_favorite =
   let open User in
   let open Contacts in
@@ -370,6 +391,11 @@ let remove_favorite =
                       | Error e1 -> Lwt.fail (failwith e1))
               | Error e2 -> Lwt.fail (failwith e2))))
 
+(** [add_conversation] creates a post request that takes in a json
+    containing the user and contact emails and outputs
+    "failure"/Lwt.fail if emails are not in userlst, and "Success" if
+    the information can be used to add a contact from given user to
+    contact that is added to contactlst*)
 let add_contact =
   let open Contacts in
   let open User in
@@ -445,6 +471,11 @@ let rec interpret_msglist mlst =
               | _ -> failwith "only one element")
           | Error e -> Lwt.fail (failwith e))
 
+(** [get_messages] creates a post request that takes in a json
+    containing the id of the conversation and outputs "failure"/Lwt.fail
+    if email is invalid or "Success" if the information can be used to
+    retireve the messages that are tied to the conversation id given.
+    This is given from retriving data from userconvolst and convolst*)
 let get_messages =
   let open UserConversation in
   let open Storage in
@@ -477,13 +508,12 @@ let get_messages =
    with | c -> Lwt.return (Response.of_json (`Assoc [ ("data", `List c)
    ]))) | Error e -> Lwt.fail (failwith e))) *)
 
-(* post_messages creates a post request that takes in a json containing
-   the username and message of a message and adds a message with the
-   userid/email and message as fields to messages Raises: "no users" if
-   the username in the json does not match the current username of any
-   user in users "invalid message json" if the input json does not
-   contain username and message *)
-
+(* [post_messages] creates a post request that takes in a json
+   containing the sender email, conversation id, and message of a
+   message and adds a message with the user id, conversation id, and
+   message as fields to msglst. Outputs "failure"/Lwt.fail if email is
+   invalid or if conversation_id is not unique or existing, or "Success"
+   if the information can be used to create the message. *)
 let post_message =
   let open Storage in
   let open User in
@@ -502,6 +532,93 @@ let post_message =
                           Lwt.return (Response.make ~status:`OK ())
                       | Error e -> Lwt.fail (failwith e))
               | Error e -> Lwt.fail (failwith e))))
+
+let post_message_bot =
+  App.post "/postMessage" (fun request ->
+      Lwt.bind (Request.to_json_exn request) (fun convo_json ->
+          match convo_json with
+          | `Assoc
+              [
+                ("sender_email", `String senderemail);
+                ("conversation_id", `Int convoid);
+                ("message", `String msg);
+                ("bob", `Bool bob);
+                ("joe", `Bool joe);
+              ] ->
+              Lwt.bind (User.id_from_email senderemail ())
+                (fun id_response ->
+                  match id_response with
+                  | Ok user_id ->
+                      Lwt.bind (Storage.add_msg user_id convoid msg ())
+                        (fun s ->
+                          match s with
+                          | Ok () ->
+                              if bob then
+                                Lwt.bind
+                                  (Storage.add_msg 1 convoid
+                                     (snd (Bot.bob_bot_response msg 0))
+                                     ())
+                                  (fun bob_response ->
+                                    match bob_response with
+                                    | Ok () ->
+                                        if joe then
+                                          if
+                                            fst
+                                              (Bot.joe_bot_response msg
+                                                 0)
+                                            = true
+                                          then
+                                            Lwt.bind
+                                              (Storage.add_msg 2 convoid
+                                                 (snd
+                                                    (Bot
+                                                     .joe_bot_response
+                                                       msg 0))
+                                                 ())
+                                              (fun joe_response ->
+                                                match joe_response with
+                                                | Ok () ->
+                                                    Lwt.return
+                                                      (Response.make
+                                                         ~status:`OK ())
+                                                | Error e ->
+                                                    Lwt.fail
+                                                      (failwith e))
+                                          else
+                                            Lwt.return
+                                              (Response.make ~status:`OK
+                                                 ())
+                                        else
+                                          Lwt.return
+                                            (Response.make ~status:`OK
+                                               ())
+                                    | Error e -> Lwt.fail (failwith e))
+                              else if joe then
+                                if
+                                  fst (Bot.joe_bot_response msg 0)
+                                  = true
+                                then
+                                  Lwt.bind
+                                    (Storage.add_msg 2 convoid
+                                       (snd
+                                          (Bot.joe_bot_response msg 0))
+                                       ())
+                                    (fun joe_response ->
+                                      match joe_response with
+                                      | Ok () ->
+                                          Lwt.return
+                                            (Response.make ~status:`OK
+                                               ())
+                                      | Error e -> Lwt.fail (failwith e))
+                                else
+                                  Lwt.return
+                                    (Response.make ~status:`OK ())
+                              else
+                                Lwt.return
+                                  (Response.make ~status:`OK ())
+                          | Error e -> Lwt.fail (failwith e))
+                  | Error e -> Lwt.fail (failwith e))
+          | _ -> failwith "oops"))
 
 (* let post_messages = App.post "/postMessage" (fun request -> Lwt.bind
    (Request.to_json_exn request) (fun input_json -> let match_user x =
@@ -562,6 +679,8 @@ let bind_functions fun1 fun2 =
   Lwt.bind fun1 (fun a ->
       match a with Ok () -> fun2 | Error e -> Lwt.fail (failwith e))
 
+(** [creates_db] initiates the databse with bob the bot and starts up
+    tables in lib modules*)
 let create_db =
   App.get "/create" (fun _ ->
       Lwt.bind (User.migrate ()) (fun a ->
@@ -575,6 +694,72 @@ let create_db =
                         (fun c ->
                           match c with
                           | Ok () ->
+                              Lwt.bind
+                                (User.username_exists "Joe-bot" ())
+                                (fun e ->
+                                  match e with
+                                  | Ok false ->
+                                      Lwt.bind
+                                        (User.add_usr "joe" "Joe Bot"
+                                           "Joe-bot" ()) (fun f ->
+                                          match f with
+                                          | Ok () ->
+                                              bind_functions
+                                                (Storage.migrate ())
+                                                (bind_functions
+                                                   (Contacts.migrate ())
+                                                   (bind_functions
+                                                      (Conversations
+                                                       .migrate ())
+                                                      (bind_functions
+                                                         (UserConversation
+                                                          .migrate ())
+                                                         (Lwt.return
+                                                            (Response
+                                                             .make
+                                                               ~status:
+                                                                 `OK ())))))
+                                          | Error e ->
+                                              Lwt.fail (failwith e))
+                                  | Ok true ->
+                                      bind_functions
+                                        (Storage.migrate ())
+                                        (bind_functions
+                                           (Contacts.migrate ())
+                                           (bind_functions
+                                              (Conversations.migrate ())
+                                              (bind_functions
+                                                 (UserConversation
+                                                  .migrate ())
+                                                 (Lwt.return
+                                                    (Response.make
+                                                       ~status:`OK ())))))
+                                  | Error e -> Lwt.fail (failwith e))
+                          | Error e -> Lwt.fail (failwith e))
+                  | Ok true ->
+                      Lwt.bind (User.username_exists "Joe-bot" ())
+                        (fun e ->
+                          match e with
+                          | Ok false ->
+                              Lwt.bind
+                                (User.add_usr "joe" "Joe Bot" "Joe-bot"
+                                   ()) (fun f ->
+                                  match f with
+                                  | Ok () ->
+                                      bind_functions
+                                        (Storage.migrate ())
+                                        (bind_functions
+                                           (Contacts.migrate ())
+                                           (bind_functions
+                                              (Conversations.migrate ())
+                                              (bind_functions
+                                                 (UserConversation
+                                                  .migrate ())
+                                                 (Lwt.return
+                                                    (Response.make
+                                                       ~status:`OK ())))))
+                                  | Error e -> Lwt.fail (failwith e))
+                          | Ok true ->
                               bind_functions (Storage.migrate ())
                                 (bind_functions (Contacts.migrate ())
                                    (bind_functions
@@ -585,22 +770,10 @@ let create_db =
                                             (Response.make ~status:`OK
                                                ())))))
                           | Error e -> Lwt.fail (failwith e))
-                  | Ok true ->
-                      bind_functions (Storage.migrate ())
-                        (bind_functions (Contacts.migrate ())
-                           (bind_functions
-                              (Conversations.migrate ())
-                              (bind_functions
-                                 (UserConversation.migrate ())
-                                 (Lwt.return
-                                    (Response.make ~status:`OK ())))))
-                      (* Lwt.bind (Storage.migrate ()) (fun e -> match e
-                         with | Ok () -> Lwt.return (Response.make
-                         ~status:`OK ()) | Error e -> Lwt.fail (failwith
-                         e)) *)
                   | Error e -> Lwt.fail (failwith e))
           | Error e -> Lwt.fail (failwith e)))
 
+(**[close_db] drops tables of all databases *)
 let close_db =
   App.get "/close" (fun _ ->
       bind_functions (User.rollback ())
@@ -633,8 +806,8 @@ let _ =
   App.empty |> App.middleware cors |> create_db |> close_db
   (*|> App.middleware static_content*)
   |> register_user
-  |> login_user (*|> read_messages *) |> get_messages
-  (*|> post_messages*) |> post_message
-  (*|> post_messages_bot*) |> add_contact
+  |> login_user (*|> read_messages *) |> change_username
+  |> get_messages (*|> post_messages*) |> post_message
+  |> post_message_bot (*|> post_messages_bot*) |> add_contact
   |> get_contacts |> get_conversations |> make_favorite
   |> remove_favorite |> make_conversation |> App.run_command
