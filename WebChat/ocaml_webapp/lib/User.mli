@@ -33,6 +33,10 @@ val add_usr :
 val email_exists : string -> unit -> (bool, 'a) result Lwt.t
 val username_exists : string -> unit -> (bool, 'a) result Lwt.t
 val user_of_email : string -> unit -> (string, 'a) result Lwt.t
+
+val change_username :
+  string -> string -> unit -> (unit, 'a) result Lwt.t
+
 val email_of_user : string -> unit -> (string, 'a) result Lwt.t
 
 val check_password :

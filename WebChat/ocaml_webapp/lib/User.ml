@@ -104,6 +104,10 @@ module UserQuery = struct
           Caqti_type.string
     @@ "select username from usrlst where email = '" ^ email ^ "'"
 
+  let change_username email username =
+    (unit ->. unit) @@ "update usrlst set username = '" ^ username
+    ^ "' where email = '" ^ email ^ "'"
+
   let get_email username =
     unit
     ->! Caqti_type.custom
@@ -183,6 +187,14 @@ let username_exists username () =
   let open UserQuery in
   Lwt.bind
     (Db.find (query_username username) ())
+    (fun result ->
+      match result with
+      | Ok data -> Lwt.return (Ok data)
+      | Error error -> Lwt.fail (failwith (Caqti_error.show error)))
+
+let change_username email username () =
+  Lwt.bind
+    (Db.exec (UserQuery.change_username email username) ())
     (fun result ->
       match result with
       | Ok data -> Lwt.return (Ok data)

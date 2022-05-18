@@ -82,19 +82,21 @@ let login_user =
                   Lwt.return (Response.of_plain_text "No User")
               | Error e -> Lwt.fail (failwith e))))
 
-(* let rec ids_to_usernames lst = let open User in match lst with | []
-   -> Lwt.return [] | h :: t -> Lwt.bind (read_all_given_id h ()) (fun
-   response -> match response with | Ok one_contact -> ( match
-   one_contact with | [] -> failwith "DNE" | [ h2 ] -> Lwt.bind
-   (ids_to_usernames t) (fun s -> Lwt.return (h2.email :: s)) | _ ->
-   failwith "only one element") | Error e -> Lwt.fail (failwith e)) *)
+let change_username =
+  App.post "/changeUsername" (fun request ->
+      Lwt.bind (Request.to_json_exn request) (fun a ->
+          match a with
+          | `Assoc
+              [
+                ("email", `String email); ("username", `String username);
+              ] ->
+              Lwt.bind (User.change_username email username ())
+                (fun b ->
+                  match b with
+                  | Ok () -> Lwt.return (Response.make ~status:`OK ())
+                  | Error e -> Lwt.fail (failwith e))
+          | _ -> Lwt.return (Response.of_plain_text "invalid username")))
 
-(* let users_from_convo convoid = let open UserConversation in Lwt.bind
-   (get_userid_from_conversationid convoid ()) (fun list_response ->
-   match list_response with | Ok user_list -> Lwt.bind (ids_to_usernames
-   user_list) (fun response -> match response with | Ok accepted ->
-   accepted | Error e -> Lwt.fail (failwith e)) | Error e -> Lwt.fail
-   (failwith e)) *)
 let rec wrap_userlist (u : string list) =
   match u with [] -> [] | h :: t -> `String h :: wrap_userlist t
 
@@ -773,8 +775,8 @@ let _ =
   App.empty |> App.middleware cors |> create_db |> close_db
   (*|> App.middleware static_content*)
   |> register_user
-  |> login_user (*|> read_messages *) |> get_messages
-  (*|> post_messages*) |> post_message
+  |> login_user (*|> read_messages *) |> change_username
+  |> get_messages (*|> post_messages*) |> post_message
   |> post_message_bot (*|> post_messages_bot*) |> add_contact
   |> get_contacts |> get_conversations |> make_favorite
   |> remove_favorite |> make_conversation |> App.run_command
