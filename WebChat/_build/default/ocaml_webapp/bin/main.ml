@@ -516,6 +516,7 @@ let post_message =
                       | Error e -> Lwt.fail (failwith e))
               | Error e -> Lwt.fail (failwith e))))
 
+<<<<<<< HEAD
 (* let post_messages = App.post "/postMessage" (fun request -> Lwt.bind
    (Request.to_json_exn request) (fun input_json -> let match_user x =
    match x with | `Assoc [ ("username", `String username); _ ] ->
@@ -550,6 +551,75 @@ let post_message =
    Error e -> Lwt.fail (failwith e)) | Error e -> Lwt.fail (failwith e))
    | Ok false -> failwith "no users" | Error e -> Lwt.fail (failwith
    e)))) *)
+=======
+let post_messages_bot =
+  App.post "/postMessageBot" (fun request ->
+      Lwt.bind (Request.to_json_exn request) (fun input_json ->
+          let match_user x =
+            match x with
+            | `Assoc [ ("username", `String username); _ ] -> username
+            | _ -> failwith "invalid message json"
+          in
+          Lwt.bind
+            (User.username_exists (match_user input_json) ())
+            (fun q ->
+              match q with
+              | Ok true ->
+                  Lwt.bind
+                    (User.email_of_user (match_user input_json) ())
+                    (fun r ->
+                      match r with
+                      | Ok a ->
+                          Lwt.bind
+                            (Storage.add_msg a "all"
+                               (let match_message y =
+                                  match y with
+                                  | `Assoc
+                                      [
+                                        _; ("message", `String message);
+                                      ] ->
+                                      message
+                                  | _ -> failwith "invalid message json"
+                                in
+                                match_message input_json)
+                               ())
+                            (fun s ->
+                              match s with
+                              | Ok () ->
+                                  Lwt.bind
+                                    (Storage.add_msg
+                                       "eaxiwojcsblxvyeijz@kvhrr.com"
+                                       "all"
+                                       (let match_message z =
+                                          match z with
+                                          | `Assoc
+                                              [
+                                                _;
+                                                ( "message",
+                                                  `String message );
+                                              ] ->
+                                              message
+                                          | _ ->
+                                              failwith
+                                                "invalid message json"
+                                        in
+                                        snd
+                                          (Bot.bob_bot_response
+                                             (match_message input_json)
+                                             4))
+                                       ())
+                                    (fun t ->
+                                      match t with
+                                      | Ok () ->
+                                          Lwt.return
+                                            (Response.make ~status:`OK
+                                               ())
+                                      | Error e -> Lwt.fail (failwith e))
+                              | Error e -> Lwt.fail (failwith e))
+                      | Error e -> Lwt.fail (failwith e))
+              | Ok false -> failwith "no users"
+              | Error e -> Lwt.fail (failwith e))))
+>>>>>>> 4094db49b7e9d85be59ce35078fa04d0932f28aa
 
 let bind_functions fun1 fun2 =
   Lwt.bind fun1 (fun a ->
