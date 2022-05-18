@@ -1,11 +1,11 @@
 open Opium
 open Ocaml_webapp
 
-(* register_user creates a post request that takes in a json containing
-   the email, password, username of a new user and outputs "Email taken"
-   if users contains the email already, "Username taken" if users
-   contains the username already, and "Success" if the information can
-   be used to create a user that is added to users *)
+(** [register_user] creates a post request that takes in a json
+    containing the email, password, username of a new user and outputs
+    "Email taken" if users contains the email already, "Username taken"
+    if users contains the username already, and "Success" if the
+    information can be used to create a user that is added to usrlst *)
 let register_user =
   App.post "/register" (fun request ->
       Lwt.bind (Request.to_json_exn request) (fun user_json ->
@@ -31,9 +31,10 @@ let register_user =
                       | Error e -> Lwt.fail (failwith e))
               | Error e -> Lwt.fail (failwith e))))
 
-(* login_user creates a post request that takes in the json containing
-   the information for a user x and outputs "No User" if x is not in
-   users and a json containing the email and username of x otherwise *)
+(** [login_user] creates a post request that takes in the json
+    containing the information for a user x and outputs "No User" if x
+    is not in users and a json containing the email and username of x
+    otherwise *)
 let login_user =
   App.post "/login" (fun request ->
       Lwt.bind (Request.to_json_exn request) (fun user_json ->
@@ -159,6 +160,12 @@ let rec gen_user_convos convoid userlist creatorid =
                   | Error e -> Lwt.fail (failwith e))
           | Error e -> Lwt.fail (failwith e))
 
+(** [make_conversation] creates a post request that takes in a json
+    containing the conversation name, creator name, and list of contacts
+    of a new conversation and outputs "invalid" if json does not parse
+    correctly, "failure"/Lwt.fail if contacts from list are not real or
+    actual contacts of user, and "Success" if the information can be
+    used to create a conversation that is added to convolst*)
 let make_conversation =
   App.post "/makeConversation" (fun request ->
       Lwt.bind (Request.to_json_exn request) (fun input_json ->
@@ -212,8 +219,12 @@ let make_conversation =
                       | Error e -> Lwt.fail (failwith e))
               | Error e -> Lwt.fail (failwith e))))
 
-(** [get_conversations] returns the conversations of a specfic user RI:
-    takes in a user id*)
+(** [get_conversations] creates a post request that takes in a json
+    containing the email of the user and outputs "failure"/Lwt.fail if
+    email is invalid or "Success" if the information can be used to
+    retireve the conversations that are tied to the user email given.
+    This is given from retriving data from usrlst, convolst, and
+    userconvolst*)
 let get_conversations =
   let open UserConversation in
   let open User in
@@ -264,8 +275,11 @@ let rec contacts_helper lst =
               | _ -> failwith "only one element")
           | Error e -> Lwt.fail (failwith e))
 
-(** [get_contacts] returns an association list of a user's contacts with
-    their email and username RI: takes in a user id*)
+(** [get_contacts] creates a post request that takes in a json
+    containing the email of the user and outputs "failure"/Lwt.fail if
+    email is invalid or "Success" if the information can be used to
+    retireve the contacts that are tied to the user email given. This is
+    given from retriving data from usrlst and contactslst*)
 let get_contacts =
   let open User in
   let open Contacts in
@@ -297,11 +311,11 @@ let get_contacts =
     users) (fun users_json -> let user_info = users_json |>
     User.user_of_yojson in ))*)
 
-(** [make_favorite] returns a success text when the contact is now a
-    favorite contact of the user.contact_id Otherwise, it returns
-    "contact does not exist" or an Lwt error RI: user and contact are
-    ids represented as ids*)
-
+(** [make_favorite] creates a post request that takes in a json
+    containing the email of the user and contact and outputs
+    "failure"/Lwt.fail if emails are invalid or "Success" if the
+    information can be used to update the favorite value of the user and
+    contact that are tied to contactslst. *)
 let make_favorite =
   let open User in
   let open Contacts in
@@ -336,6 +350,11 @@ let make_favorite =
                       | Error e1 -> Lwt.fail (failwith e1))
               | Error e2 -> Lwt.fail (failwith e2))))
 
+(** [remove_favorite] creates a post request that takes in a json
+    containing the email of the user and contact and outputs
+    "failure"/Lwt.fail if emails are invalid or "Success" if the
+    information can be used to update the favorite value of the user and
+    contact that are tied to contactslst. *)
 let remove_favorite =
   let open User in
   let open Contacts in
@@ -370,6 +389,11 @@ let remove_favorite =
                       | Error e1 -> Lwt.fail (failwith e1))
               | Error e2 -> Lwt.fail (failwith e2))))
 
+(** [add_conversation] creates a post request that takes in a json
+    containing the user and contact emails and outputs
+    "failure"/Lwt.fail if emails are not in userlst, and "Success" if
+    the information can be used to add a contact from given user to
+    contact that is added to contactlst*)
 let add_contact =
   let open Contacts in
   let open User in
@@ -445,6 +469,11 @@ let rec interpret_msglist mlst =
               | _ -> failwith "only one element")
           | Error e -> Lwt.fail (failwith e))
 
+(** [get_messages] creates a post request that takes in a json
+    containing the id of the conversation and outputs "failure"/Lwt.fail
+    if email is invalid or "Success" if the information can be used to
+    retireve the messages that are tied to the conversation id given.
+    This is given from retriving data from userconvolst and convolst*)
 let get_messages =
   let open UserConversation in
   let open Storage in
@@ -477,13 +506,12 @@ let get_messages =
    with | c -> Lwt.return (Response.of_json (`Assoc [ ("data", `List c)
    ]))) | Error e -> Lwt.fail (failwith e))) *)
 
-(* post_messages creates a post request that takes in a json containing
-   the username and message of a message and adds a message with the
-   userid/email and message as fields to messages Raises: "no users" if
-   the username in the json does not match the current username of any
-   user in users "invalid message json" if the input json does not
-   contain username and message *)
-
+(* [post_messages] creates a post request that takes in a json
+   containing the sender email, conversation id, and message of a
+   message and adds a message with the user id, conversation id, and
+   message as fields to msglst. Outputs "failure"/Lwt.fail if email is
+   invalid or if conversation_id is not unique or existing, or "Success"
+   if the information can be used to create the message. *)
 let post_message =
   let open Storage in
   let open User in
@@ -562,6 +590,8 @@ let bind_functions fun1 fun2 =
   Lwt.bind fun1 (fun a ->
       match a with Ok () -> fun2 | Error e -> Lwt.fail (failwith e))
 
+(** [creates_db] initiates the databse with bob the bot and starts up
+    tables in lib modules*)
 let create_db =
   App.get "/create" (fun _ ->
       Lwt.bind (User.migrate ()) (fun a ->
@@ -601,6 +631,7 @@ let create_db =
                   | Error e -> Lwt.fail (failwith e))
           | Error e -> Lwt.fail (failwith e)))
 
+(**[close_db] drops tables of all databases *)
 let close_db =
   App.get "/close" (fun _ ->
       bind_functions (User.rollback ())
