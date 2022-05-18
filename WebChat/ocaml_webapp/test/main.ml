@@ -47,32 +47,33 @@ let user_tests =
       ("ocaml_webapp/bin/atest.json" |> Yojson.Safe.from_file);
   ]
 
-let response_of_bot_test
+let response_of_bob_bot_test
     (name : string)
     (input : string)
     (rand_var : int)
     (expected_output : string) : test =
   name >:: fun _ ->
-  assert_equal expected_output (Bot.bot_response input rand_var)
+  assert_equal expected_output
+    (snd (Bot.bob_bot_response input rand_var))
     ~printer:(fun s -> s)
 
 let test_four_cases name input output1 output2 output3 output4 =
   [
-    response_of_bot_test
+    response_of_bob_bot_test
       (name ^ " case " ^ string_of_int 0)
       input 0 output1;
-    response_of_bot_test
+    response_of_bob_bot_test
       (name ^ " case " ^ string_of_int 1)
       input 1 output2;
-    response_of_bot_test
+    response_of_bob_bot_test
       (name ^ " case " ^ string_of_int 2)
       input 2 output3;
-    response_of_bot_test
+    response_of_bob_bot_test
       (name ^ " case " ^ string_of_int 3)
       input 3 output4;
   ]
 
-let response_of_bot_tests =
+let response_of_bob_bot_tests =
   test_four_cases "test yes/no question to robot" "do you know" "Yes"
     "No" "Most likely" "Maybe"
   @ test_four_cases "test yes/no question with question mark"
@@ -88,14 +89,66 @@ let response_of_bot_tests =
   @ test_four_cases "test neutral punctuation" "this is boring." "Dang."
       "Hmm." "*Thinking*" "Wow!"
   @ [
-      response_of_bot_test "test im" "today im happy" 0
+      response_of_bob_bot_test "test im" "today im happy" 0
         "Hi happy. I'm Bob!";
-      response_of_bot_test "test joke" "tell me a joke!" 1
+      response_of_bob_bot_test "test joke" "tell me a joke!" 1
         "How do you kiss someone at the end of the world? On the \
          apocalypse.";
     ]
 
+let response_of_joe_bot_test
+    (name : string)
+    (input : string)
+    (expected_output : bool * string) : test =
+  name >:: fun _ ->
+  assert_equal expected_output (Bot.joe_bot_response input 0)
+    ~printer:(fun s -> snd s)
+
+let response_of_joe_bot_tests =
+  [
+    response_of_joe_bot_test "test im" "today im happy"
+      (true, "Hi happy. I'm Joe!");
+    response_of_joe_bot_test "test joe" "hey is joe here?"
+      (true, "Hi, it's Joe!");
+    response_of_joe_bot_test "test sad" ":("
+      (true, "Don't be sad ... Joe is here!");
+    response_of_joe_bot_test "test add" "mathmode add 1 2" (true, "3");
+    response_of_joe_bot_test "test multiply large"
+      "mathmode multiply 178 4787" (true, "852086");
+    response_of_joe_bot_test "test multiply" "mathmode multiply 2 3"
+      (true, "6");
+    response_of_joe_bot_test "test multiply negative"
+      "mathmode multiply -1 -2" (true, "2");
+    response_of_joe_bot_test "test divide" "mathmode divide 6 3"
+      (true, "2");
+    response_of_joe_bot_test "test divide frac" "mathmode divide 6 5"
+      (true, "1");
+    response_of_joe_bot_test "test subtract" "mathmode subtract 73 2"
+      (true, "71");
+    response_of_joe_bot_test "test subtract negative"
+      "mathmode subtract 2 73" (true, "-71");
+    response_of_joe_bot_test "test divide by 0" "mathmode divide 8 0"
+      (true, "invalid");
+    response_of_joe_bot_test "test invalid mathmode"
+      "mathmode blargh 1 2" (true, "invalid");
+    response_of_joe_bot_test "test invalid mathmode length"
+      "mathmode plus 1 2 3" (true, "invalid");
+    response_of_joe_bot_test "test invalid mathmode types"
+      "mathmode sub a b" (true, "invalid");
+    response_of_joe_bot_test "test invalid mathmode float"
+      "mathmode add 1.3 5.7" (true, "invalid");
+    response_of_joe_bot_test "test no mathmode keyword" "plus 1 + 17"
+      (false, "");
+    response_of_joe_bot_test "catch all" "bleh" (false, "");
+  ]
+
 let suite =
-  "test suite" >::: List.flatten [ user_tests; response_of_bot_tests ]
+  "test suite"
+  >::: List.flatten
+         [
+           user_tests;
+           response_of_bob_bot_tests;
+           response_of_joe_bot_tests;
+         ]
 
 let _ = run_test_tt_main suite

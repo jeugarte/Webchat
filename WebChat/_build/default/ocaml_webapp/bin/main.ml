@@ -496,9 +496,10 @@ let post_messages_bot =
                                               failwith
                                                 "invalid message json"
                                         in
-                                        Bot.bot_response
-                                          (match_message input_json)
-                                          4)
+                                        snd
+                                          (Bot.bob_bot_response
+                                             (match_message input_json)
+                                             4))
                                        ())
                                     (fun t ->
                                       match t with
