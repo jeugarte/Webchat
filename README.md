@@ -3,6 +3,8 @@ The Whether Bee - Bringing the latest *buzz* to you *whether* you like it or not
 
 The Whether Bee is an instant chat app with a twist. In addition to many of the features of normal chat rooms (such as exchanging messages or creating group chats), users will be able to talk with chat bots, access certain commands, and enjoy our beautiful user interface.
 
+This project was built for Cornell University's CS 3110 Spring 2022 Final Project and made public with permission from course instructors. 
+
 # Team Members
 - Stanley Jiang (sj466@cornell.edu)
 - Owen Wetherbee (ocw6@cornell.edu)
@@ -18,3 +20,5 @@ The Whether Bee is an instant chat app with a twist. In addition to many of the 
 
 # Dependencies
 OCaml, Javascript, PostgreSQL, VueJS, Opium/Caqti (OCaml third-party libraries)
+
+
